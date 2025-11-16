@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Civic renewal color system */
+    --background: 60 17% 97%;
+    --foreground: 144 15% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 144 15% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 144 15% 20%;
+
+    /* Primary: Civic Green - growth and renewal */
+    --primary: 144 51% 33%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Soft neutrals for UI surfaces */
+    --secondary: 60 15% 95%;
+    --secondary-foreground: 144 15% 25%;
+
+    --muted: 60 10% 92%;
+    --muted-foreground: 144 10% 45%;
+
+    /* Accent: Optimistic Yellow */
+    --accent: 45 93% 64%;
+    --accent-foreground: 144 25% 20%;
+
+    /* Urgent Red for critical CTAs */
+    --destructive: 0 69% 49%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 60 12% 88%;
+    --input: 60 12% 88%;
+    --ring: 144 51% 33%;
+
+    --radius: 0.75rem;
+
+    /* Additional semantic tokens */
+    --success: 144 51% 33%;
+    --warning: 45 93% 64%;
+    --info: 210 75% 45%;
+
+    /* Progress and impact colors */
+    --progress-bg: 60 15% 90%;
+    --progress-fill: 144 51% 33%;
+
+    /* Sidebar tokens */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 144 15% 25%;
+    --sidebar-primary: 144 51% 33%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 60 15% 95%;
+    --sidebar-accent-foreground: 144 15% 25%;
+    --sidebar-border: 60 12% 88%;
+    --sidebar-ring: 144 51% 33%;
+  }
+
+  .dark {
+    --background: 144 15% 10%;
+    --foreground: 60 17% 97%;
+
+    --card: 144 15% 13%;
+    --card-foreground: 60 17% 97%;
+
+    --popover: 144 15% 13%;
+    --popover-foreground: 60 17% 97%;
+
+    --primary: 144 45% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 144 12% 18%;
+    --secondary-foreground: 60 17% 97%;
+
+    --muted: 144 12% 18%;
+    --muted-foreground: 60 10% 65%;
+
+    --accent: 45 85% 55%;
+    --accent-foreground: 144 25% 10%;
+
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 144 12% 22%;
+    --input: 144 12% 22%;
+    --ring: 144 45% 45%;
+
+    --progress-bg: 144 12% 20%;
+    --progress-fill: 144 45% 45%;
+
+    --sidebar-background: 144 15% 10%;
+    --sidebar-foreground: 60 17% 90%;
+    --sidebar-primary: 144 45% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 144 12% 18%;
+    --sidebar-accent-foreground: 60 17% 90%;
+    --sidebar-border: 144 12% 22%;
+    --sidebar-ring: 144 45% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+/* Custom animations */
+@keyframes pulse-gentle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes progress-fill {
+  from { width: 0; }
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
