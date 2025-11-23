@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, DollarSign, Users, TrendingUp, Calendar, FileText, Image, Target, UserCircle, Handshake, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, DollarSign, Users, TrendingUp, Calendar, FileText, Image, Target, UserCircle, Handshake, Loader2, ExternalLink } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProducts } from "@/hooks/use-shopify-products";
@@ -82,6 +82,7 @@ const AdminDashboard = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(null);
   
   // Project Updates state
   const [projectUpdates, setProjectUpdates] = useState<ProjectUpdate[]>([]);
@@ -149,48 +150,36 @@ const AdminDashboard = () => {
 
   const checkAuth = async () => {
     try {
-      // Check session first
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (!session) {
-        // Try getUser as fallback
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        
-        if (authError || !user) {
-          navigate("/auth");
-          return;
-        }
-        
-        setUser(user);
-        setIsAdmin(true);
+        navigate("/auth");
         return;
       }
 
       setUser(session.user);
+      setAuthToken(session.access_token);
 
-      // TEMPORARY: Skip admin check for testing
-      // TODO: Re-enable admin role check before production
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "admin")
+        .single();
+
+      if (roleError || !roleData) {
+        toast({
+          title: "Access denied",
+          description: "You must be an admin to view this page.",
+          variant: "destructive",
+        });
+        navigate("/");
+        return;
+      }
+
       setIsAdmin(true);
-
-      // Check if user has admin role
-      // const { data: roleData, error: roleError } = await supabase
-      //   .from("user_roles")
-      //   .select("role")
-      //   .eq("user_id", session.user.id)
-      //   .eq("role", "admin")
-      //   .single();
-
-      // if (roleError || !roleData) {
-      //   toast({
-      //     title: "Access Denied",
-      //     description: "You don't have admin privileges",
-      //     variant: "destructive",
-      //   });
-      //   navigate("/");
-      //   return;
-      // }
-
-      // setIsAdmin(true);
     } catch (error) {
       console.error("Auth error:", error);
       navigate("/auth");
@@ -219,22 +208,65 @@ const AdminDashboard = () => {
   };
 
   const fetchProjectUpdates = async () => {
-    const { data, error } = await supabase
-      .from("project_updates")
-      .select("*")
-      .order("date", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("project_updates")
+        .select("*")
+        .order("date", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching project updates:", error);
+      if (error) {
+        // If table doesn't exist (404) or RLS issue, just log and continue
+        if (error.code === 'PGRST116' || error.message?.includes('404') || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+          console.warn("project_updates table may not exist yet. Run migrations to create it.");
+          setProjectUpdates([]);
+          return;
+        }
+        console.error("Error fetching project updates:", error);
+        // Don't show toast for missing table - it's expected if migrations haven't run
+        if (!error.message?.includes('does not exist') && !error.message?.includes('404')) {
+          toast({
+            title: "Error",
+            description: "Failed to load project updates",
+            variant: "destructive",
+          });
+        }
+        setProjectUpdates([]);
+        return;
+      }
+
+      setProjectUpdates(data || []);
+    } catch (err: any) {
+      console.warn("Error fetching project updates:", err);
+      setProjectUpdates([]);
+    }
+  };
+
+  const invokeProjectUpdatesFunction = async (
+    action: "create" | "update" | "delete",
+    payload: Record<string, unknown>
+  ) => {
+    if (!authToken) {
       toast({
-        title: "Error",
-        description: "Failed to load project updates",
+        title: "Session required",
+        description: "Please sign in again to manage project updates.",
         variant: "destructive",
       });
-      return;
+      throw new Error("Missing auth token");
     }
 
-    setProjectUpdates(data || []);
+    const { data, error } = await supabase.functions.invoke("admin-project-updates", {
+      body: { action, payload },
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+
+    if (error) {
+      console.error("admin-project-updates error:", error);
+      throw new Error(error.message || "Failed to process request");
+    }
+
+    return data;
   };
 
   const subscribeToProjects = () => {
@@ -272,6 +304,7 @@ const AdminDashboard = () => {
       raised_amount: editingProject?.raised_amount || 0,
       donor_count: editingProject?.donor_count || 0,
       status: "active",
+      shopify_product_handle: formData.shopify_product_handle || null,
     };
 
     if (editingProject) {
@@ -306,6 +339,7 @@ const AdminDashboard = () => {
           raised_amount: 0,
           donor_count: 0,
           status: "active",
+          shopify_product_handle: projectData.shopify_product_handle,
         } as any);
 
       if (error) {
@@ -336,6 +370,7 @@ const AdminDashboard = () => {
       goal_amount: project.goal_amount.toString(),
       image_url: project.image_url || "",
       days_left: project.days_left?.toString() || "",
+      shopify_product_handle: project.shopify_product_handle || "",
     });
     setShowCreateForm(true);
   };
@@ -389,43 +424,30 @@ const AdminDashboard = () => {
       image_url: updateFormData.image_url || null,
     };
 
-    if (editingUpdate) {
-      const { error } = await supabase
-        .from("project_updates")
-        .update(updateData)
-        .eq("id", editingUpdate.id);
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to update project update",
-          variant: "destructive",
+    try {
+      if (editingUpdate) {
+        await invokeProjectUpdatesFunction("update", {
+          id: editingUpdate.id,
+          ...updateData,
         });
-        return;
-      }
-
-      toast({
-        title: "Success",
-        description: "Project update updated successfully",
-      });
-    } else {
-      const { error } = await supabase
-        .from("project_updates")
-        .insert(updateData);
-
-      if (error) {
         toast({
-          title: "Error",
-          description: "Failed to create project update",
-          variant: "destructive",
+          title: "Success",
+          description: "Project update updated successfully",
         });
-        return;
+      } else {
+        await invokeProjectUpdatesFunction("create", updateData);
+        toast({
+          title: "Success",
+          description: "Project update created successfully",
+        });
       }
-
+    } catch (err: any) {
       toast({
-        title: "Success",
-        description: "Project update created successfully",
+        title: "Error",
+        description: err.message || "Failed to save project update",
+        variant: "destructive",
       });
+      return;
     }
 
     resetUpdateForm();
@@ -448,25 +470,20 @@ const AdminDashboard = () => {
   const handleDeleteUpdate = async (updateId: string) => {
     if (!confirm("Are you sure you want to delete this update?")) return;
 
-    const { error } = await supabase
-      .from("project_updates")
-      .delete()
-      .eq("id", updateId);
-
-    if (error) {
+    try {
+      await invokeProjectUpdatesFunction("delete", { id: updateId });
+      toast({
+        title: "Success",
+        description: "Update deleted successfully",
+      });
+      fetchProjectUpdates();
+    } catch (err: any) {
       toast({
         title: "Error",
-        description: "Failed to delete update",
+        description: err.message || "Failed to delete update",
         variant: "destructive",
       });
-      return;
     }
-
-    toast({
-      title: "Success",
-      description: "Update deleted successfully",
-    });
-    fetchProjectUpdates();
   };
 
   const resetUpdateForm = () => {
@@ -876,14 +893,38 @@ const AdminDashboard = () => {
 
                 <div>
                   <Label htmlFor="shopify_product_handle">Shopify Product Handle</Label>
-                  <Input
-                    id="shopify_product_handle"
-                    value={formData.shopify_product_handle}
-                    onChange={(e) => setFormData({ ...formData, shopify_product_handle: e.target.value })}
-                    placeholder="product-handle-from-shopify"
-                  />
+                  <div className="flex gap-2">
+                    <Select
+                      value={formData.shopify_product_handle}
+                      onValueChange={(value) => setFormData({ ...formData, shopify_product_handle: value })}
+                    >
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Select a Shopify product" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {productsLoading ? (
+                          <SelectItem value="loading" disabled>Loading products...</SelectItem>
+                        ) : productsData?.edges.length === 0 ? (
+                          <SelectItem value="no-products" disabled>No products found</SelectItem>
+                        ) : (
+                          productsData?.edges.map(({ node: product }) => (
+                            <SelectItem key={product.handle} value={product.handle}>
+                              {product.title} ({product.handle})
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      id="shopify_product_handle"
+                      value={formData.shopify_product_handle}
+                      onChange={(e) => setFormData({ ...formData, shopify_product_handle: e.target.value })}
+                      placeholder="Or type handle manually"
+                      className="flex-1"
+                    />
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    The product handle from your Shopify store (e.g., "tuskegee-townhouse")
+                    Select from your Shopify products or type the handle manually (e.g., "investment-tier-1")
                   </p>
                 </div>
 
@@ -1382,6 +1423,34 @@ const AdminDashboard = () => {
                         {project.days_left && (
                           <div>
                             <span className="font-semibold">Days left:</span> {project.days_left}
+                          </div>
+                        )}
+                        {project.shopify_product_handle && (
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold">Shopify Handle:</span>{" "}
+                            <code className="bg-muted px-2 py-1 rounded text-xs">
+                              {project.shopify_product_handle}
+                            </code>
+                            <a
+                              href={`https://${import.meta.env.VITE_SHOPIFY_STORE_DOMAIN || 'your-store.myshopify.com'}/products/${project.shopify_product_handle}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline text-xs flex items-center gap-1"
+                              title="View product page"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              View Product
+                            </a>
+                            <a
+                              href={`https://admin.shopify.com/store/${import.meta.env.VITE_SHOPIFY_STORE_DOMAIN?.replace('.myshopify.com', '') || 'your-store'}/products`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-muted-foreground hover:text-foreground text-xs flex items-center gap-1"
+                              title="View in Shopify Admin"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              Admin
+                            </a>
                           </div>
                         )}
                       </div>

@@ -273,6 +273,10 @@ export const GET_CART = `
               ... on ProductVariant {
                 id
                 title
+                price {
+                  amount
+                  currencyCode
+                }
                 selectedOptions {
                   name
                   value
@@ -334,7 +338,7 @@ export async function getProducts(options?: {
   };
 }> {
   const response = await shopifyQuery<{
-    products: {
+    products?: {
       edges: Array<{ node: ShopifyProduct }>;
       pageInfo: {
         hasNextPage: boolean;
@@ -348,6 +352,13 @@ export async function getProducts(options?: {
     after: options?.after || null,
     query: options?.query || null,
   });
+
+  if (!response?.products) {
+    throw new Error(
+      "Unable to load Shopify products. Verify your Storefront API credentials and ensure products are available."
+    );
+  }
+
   return response.products;
 }
 

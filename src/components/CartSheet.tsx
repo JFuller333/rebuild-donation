@@ -143,6 +143,12 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
                   style: "currency",
                   currency: line.cost.totalAmount.currencyCode,
                 }).format(lineTotal);
+                
+                // Check if this is a $0.01 variant (custom amount donation)
+                const variantPrice = line.merchandise.price?.amount 
+                  ? parseFloat(line.merchandise.price.amount) 
+                  : null;
+                const isCustomAmountVariant = variantPrice !== null && Math.abs(variantPrice - 0.01) < 0.001;
 
                 return (
                   <div
@@ -166,41 +172,49 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
                         )}
                       </div>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() =>
-                              handleUpdateQuantity(line.id, line.quantity, -1)
-                            }
-                            disabled={isUpdating || isRemoving}
-                          >
-                            {isUpdating ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Minus className="h-3 w-3" />
-                            )}
-                          </Button>
-                          <span className="w-8 text-center text-sm font-medium">
-                            {line.quantity}
-                          </span>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() =>
-                              handleUpdateQuantity(line.id, line.quantity, 1)
-                            }
-                            disabled={isUpdating || isRemoving}
-                          >
-                            {isUpdating ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Plus className="h-3 w-3" />
-                            )}
-                          </Button>
-                        </div>
+                        {/* Hide quantity controls for $0.01 custom amount variants */}
+                        {!isCustomAmountVariant && (
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() =>
+                                handleUpdateQuantity(line.id, line.quantity, -1)
+                              }
+                              disabled={isUpdating || isRemoving}
+                            >
+                              {isUpdating ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Minus className="h-3 w-3" />
+                              )}
+                            </Button>
+                            <span className="w-8 text-center text-sm font-medium">
+                              {line.quantity}
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() =>
+                                handleUpdateQuantity(line.id, line.quantity, 1)
+                              }
+                              disabled={isUpdating || isRemoving}
+                            >
+                              {isUpdating ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Plus className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </div>
+                        )}
+                        {isCustomAmountVariant && (
+                          <div className="text-sm text-muted-foreground">
+                            Custom Amount
+                          </div>
+                        )}
                         <div className="flex items-center gap-2">
                           <span className="font-semibold">{formattedLineTotal}</span>
                           <Button

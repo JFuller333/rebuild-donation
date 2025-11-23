@@ -48,6 +48,10 @@ export const CART_CREATE = `
                 ... on ProductVariant {
                   id
                   title
+                  price {
+                    amount
+                    currencyCode
+                  }
                   selectedOptions {
                     name
                     value
@@ -131,6 +135,10 @@ export const CART_LINES_ADD = `
                 ... on ProductVariant {
                   id
                   title
+                  price {
+                    amount
+                    currencyCode
+                  }
                   selectedOptions {
                     name
                     value
@@ -214,6 +222,10 @@ export const CART_LINES_UPDATE = `
                 ... on ProductVariant {
                   id
                   title
+                  price {
+                    amount
+                    currencyCode
+                  }
                   selectedOptions {
                     name
                     value
@@ -297,6 +309,10 @@ export const CART_LINES_REMOVE = `
                 ... on ProductVariant {
                   id
                   title
+                  price {
+                    amount
+                    currencyCode
+                  }
                   selectedOptions {
                     name
                     value

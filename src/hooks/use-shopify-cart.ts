@@ -146,10 +146,17 @@ export function useRemoveFromCart() {
 }
 
 /**
- * Hook to get cart item count
+ * Hook to get cart item count (for badge)
+ * For custom amount variants ($0.01), count as 1 item instead of the quantity
+ * This prevents showing huge numbers like "60,000" in the cart badge
  */
 export function useCartItemCount(): number {
   const { data: cart } = useCart();
-  return cart?.totalQuantity || 0;
+  
+  if (!cart) return 0;
+  
+  // Count unique line items instead of total quantity
+  // This way $0.01 variants with high quantities count as 1 item
+  return cart.lines?.edges?.length || 0;
 }
 

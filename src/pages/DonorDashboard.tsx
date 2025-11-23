@@ -35,13 +35,13 @@ const DonorDashboard = () => {
     if (!session) {
       // Try getUser as fallback
       const { data: { user }, error } = await supabase.auth.getUser();
-      
+    
       if (error || !user) {
-        navigate("/auth");
-        return;
-      }
-      
-      await fetchDonorData(user.id);
+      navigate("/auth");
+      return;
+    }
+
+    await fetchDonorData(user.id);
       return;
     }
 
@@ -64,7 +64,7 @@ const DonorDashboard = () => {
         .from("donations")
         .select(`
           *,
-          projects (*)
+          projects (id, title)
         `)
         .eq("donor_id", userId)
         .order("created_at", { ascending: false });
@@ -208,25 +208,81 @@ const DonorDashboard = () => {
                 <Card key={donation.id} className="hover:shadow-lg transition-shadow">
                   <CardContent className="py-6">
                     <div className="flex items-start justify-between">
-                      <div className="flex gap-4">
+                      <div className="flex gap-4 flex-1">
                         <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <Heart className="h-8 w-8 text-primary" />
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <h3 className="text-xl font-bold mb-1">
-                            {donation.projects?.title || "Project"}
+                            {donation.projects?.title || (
+                              donation.shopify_product_handle ? (
+                                <span className="text-muted-foreground">
+                                  Project (Product: {donation.shopify_product_handle})
+                                </span>
+                              ) : (
+                                "Project"
+                              )
+                            )}
                           </h3>
+                          {donation.shopify_order_name && (
+                            <p className="text-xs text-muted-foreground mb-1">
+                              Order: {donation.shopify_order_name}
+                            </p>
+                          )}
                           <p className="text-sm text-muted-foreground mb-2">
                             {formatDate(donation.created_at)}
                           </p>
-                          <div className="flex items-center gap-4 text-sm">
+                          <div className="flex items-center gap-4 text-sm mb-3">
                             <span className="text-muted-foreground">
                               Status: <span className="text-foreground capitalize">{donation.status}</span>
                             </span>
                             <span className="text-muted-foreground">
                               Type: <span className="text-foreground capitalize">{donation.donation_type}</span>
                             </span>
+                            {!donation.projects && donation.shopify_product_handle && (
+                              <span className="text-xs text-warning">
+                                ⚠️ Project not linked
+                              </span>
+                            )}
                           </div>
+                          {(donation.projects?.id || donation.shopify_product_handle) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                // Use shopify_product_handle from donation if available, otherwise use project id
+                                const handle = donation.shopify_product_handle || donation.projects?.id;
+                                if (handle) {
+                                  navigate(`/products/${handle}`);
+                                }
+                              }}
+                              className="mt-2"
+                            >
+                              View Project →
+                            </Button>
+                          )}
+                          {donation.receipt_url ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                // Open receipt in new tab
+                                window.open(donation.receipt_url, '_blank');
+                              }}
+                              className="mt-2"
+                            >
+                              <FileDown className="h-4 w-4 mr-2" />
+                              Download Receipt
+                            </Button>
+                          ) : donation.receipt_generated_at ? (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Receipt processing...
+                            </p>
+                          ) : (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Receipt will be available soon
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="text-right">

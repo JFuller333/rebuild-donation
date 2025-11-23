@@ -95,7 +95,7 @@ const Auth = () => {
       if (roleData) {
         navigate("/admin-dashboard");
       } else {
-        navigate("/donor-dashboard");
+      navigate("/donor-dashboard");
       }
     } catch (error: any) {
       toast({

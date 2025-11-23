@@ -37,12 +37,20 @@ export const Header = () => {
 
   const checkAdminRole = async (userId: string) => {
     try {
+      // Use maybeSingle() instead of single() to handle case where no role exists
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", userId)
         .eq("role", "admin")
-        .single();
+        .maybeSingle();
+
+      // If table doesn't exist (406/404), just assume not admin
+      if (error && (error.code === 'PGRST116' || error.message?.includes('406') || error.message?.includes('relation') || error.message?.includes('does not exist'))) {
+        console.warn("user_roles table may not exist yet. Run migrations to create it.");
+        setIsAdmin(false);
+        return;
+      }
 
       const hasAdminRole = !error && data !== null;
       setIsAdmin(hasAdminRole);
@@ -60,20 +68,28 @@ export const Header = () => {
     }
   };
 
+  const handleAdminClick = () => {
+    if (!user || !isAdmin) {
+      navigate("/auth");
+      return;
+    }
+    navigate("/admin-dashboard");
+  };
+
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-8">
-            <h2 
-              className="text-2xl font-bold tracking-tight cursor-pointer"
-              onClick={() => navigate("/")}
-            >
-              Rebuild Together
-            </h2>
-          </div>
-          
-          <div className="flex items-center gap-4">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="flex items-center gap-8">
+          <h2 
+            className="text-2xl font-bold tracking-tight cursor-pointer"
+            onClick={() => navigate("/")}
+          >
+            Rebuild Together
+          </h2>
+        </div>
+        
+        <div className="flex items-center gap-4">
             {/* Cart Button */}
             <Button
               variant="ghost"
@@ -89,67 +105,54 @@ export const Header = () => {
               )}
             </Button>
 
-            {user ? (
-              <>
-                <Button 
-                  variant="ghost" 
-                  className="hidden md:inline-flex"
-                  onClick={() => navigate("/donor-dashboard")}
-                >
-                  <User className="mr-2 h-4 w-4" />
-                  Donor Dashboard
-                </Button>
-                {isAdmin && (
-                  <Button 
-                    variant="ghost" 
-                    className="hidden md:inline-flex"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      console.log("Admin button clicked, isAdmin:", isAdmin);
-                      navigate("/admin-dashboard");
-                    }}
-                  >
-                    Admin
-                  </Button>
-                )}
-                {/* Temporary: Show admin button for all logged-in users (matching AdminDashboard behavior) */}
-                {user && !isAdmin && (
-                  <Button 
-                    variant="ghost" 
-                    className="hidden md:inline-flex"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      console.log("Admin button clicked (temp access)");
-                      navigate("/admin-dashboard");
-                    }}
-                  >
-                    Admin
-                  </Button>
-                )}
-                <Button onClick={() => navigate("/projects/maple-street-housing")}>
-                  Donate Now
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button 
-                  variant="ghost" 
-                  className="hidden md:inline-flex"
-                  onClick={() => navigate("/auth")}
-                >
-                  Sign In
-                </Button>
-                <Button onClick={() => navigate("/projects/maple-street-housing")}>
-                  Donate Now
-                </Button>
-              </>
-            )}
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </div>
+          {user ? (
+            <>
+              <Button 
+                variant="ghost" 
+                className="hidden md:inline-flex"
+                onClick={() => navigate("/donor-dashboard")}
+              >
+                <User className="mr-2 h-4 w-4" />
+                Donor Dashboard
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="hidden md:inline-flex"
+                onClick={handleAdminClick}
+              >
+                Admin
+              </Button>
+              <Button onClick={() => navigate("/projects/maple-street-housing")}>
+                Donate Now
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button 
+                variant="ghost" 
+                className="hidden md:inline-flex"
+                onClick={handleAdminClick}
+              >
+                Admin
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="hidden md:inline-flex"
+                onClick={() => navigate("/auth")}
+              >
+                Sign In
+              </Button>
+              <Button onClick={() => navigate("/projects/maple-street-housing")}>
+                Donate Now
+              </Button>
+            </>
+          )}
+          <Button variant="ghost" size="icon" className="md:hidden">
+            <Menu className="h-5 w-5" />
+          </Button>
         </div>
-      </header>
+      </div>
+    </header>
       <CartSheet open={cartOpen} onOpenChange={setCartOpen} />
     </>
   );

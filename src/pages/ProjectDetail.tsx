@@ -30,9 +30,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useProduct } from "@/hooks/use-shopify-products";
 import { useAddToCart } from "@/hooks/use-shopify-cart";
-import { getDefaultVariant, getVariantPriceFormatted } from "@/lib/shopify-adapters";
+import { getDefaultVariant, getVariantPriceFormatted, getSmallestVariant, getVariantByPrice } from "@/lib/shopify-adapters";
 import { supabase } from "@/integrations/supabase/client";
 import { getProductImageUrl } from "@/lib/shopify-adapters";
+import type { ProductVariant } from "@/integrations/shopify/types";
 
 interface ProjectUpdate {
   id: string;
@@ -56,7 +57,7 @@ const ProjectDetail = () => {
   const { toast } = useToast();
   const [donationAmount, setDonationAmount] = useState("");
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
-  
+
   // Initial render log
   console.log("🔵 ProjectDetail component rendered", { productHandle });
   
@@ -268,7 +269,121 @@ const ProjectDetail = () => {
   const handleAddToCart = () => {
     if (!product) return;
 
-    const variant = getDefaultVariant(product);
+    let variant: ProductVariant | null = null;
+    let quantity = 1;
+    let isCustomAmountVariant = false;
+    let customAmount = 0;
+
+    // Debug logging
+    console.log('🛒 handleAddToCart called:', {
+      selectedTier,
+      donationAmount,
+      hasProduct: !!product,
+      variantCount: product.variants?.edges?.length || 0,
+    });
+
+    // If user selected a tier, use that variant
+    if (selectedTier) {
+      console.log('📌 Using selected tier:', selectedTier);
+      variant = getVariantByPrice(product, selectedTier);
+      if (!variant) {
+        // Fallback: find closest variant
+        console.log('⚠️ Tier variant not found, using default');
+        variant = getDefaultVariant(product);
+      }
+      quantity = 1;
+    } 
+    // If user entered custom amount, use smallest variant and calculate quantity
+    else if (donationAmount && parseFloat(donationAmount) > 0) {
+      customAmount = parseFloat(donationAmount);
+      console.log('💰 Using custom amount:', customAmount);
+      
+      // Validate custom amount
+      if (customAmount < 0.01) {
+        toast({
+          title: "Invalid amount",
+          description: "Minimum donation amount is $0.01",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Find the smallest variant (preferably $0.01)
+      variant = getSmallestVariant(product);
+      
+      if (!variant) {
+        console.error('❌ No smallest variant found');
+        toast({
+          title: "Error",
+          description: "No available variant found for custom amount",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const variantPrice = parseFloat(variant.price.amount);
+      isCustomAmountVariant = Math.abs(variantPrice - 0.01) < 0.001;
+      
+      console.log('✅ Using variant:', {
+        id: variant.id,
+        price: variantPrice,
+        priceRaw: variant.price.amount,
+        title: variant.title,
+        availableForSale: variant.availableForSale,
+        isCustomAmountVariant,
+      });
+      
+      // Calculate quantity: customAmount / variantPrice
+      // Round to nearest integer (Shopify requires whole number quantities)
+      quantity = Math.round(customAmount / variantPrice);
+      
+      // Check if variant has quantity limits
+      const maxQuantity = variant.quantityAvailable > 0 ? variant.quantityAvailable : null;
+      if (maxQuantity && quantity > maxQuantity) {
+        console.warn(`⚠️ Requested quantity ${quantity} exceeds available ${maxQuantity}. Capping to ${maxQuantity}.`);
+        quantity = maxQuantity;
+      }
+      
+      // Ensure quantity is at least 1
+      if (quantity < 1) {
+        quantity = 1;
+      }
+
+      const calculatedTotal = quantity * variantPrice;
+      console.log('📊 Calculation:', {
+        customAmount,
+        variantPrice,
+        quantity,
+        maxQuantityAvailable: variant.quantityAvailable,
+        calculatedTotal: calculatedTotal.toFixed(2),
+        formula: `${customAmount} / ${variantPrice} = ${(customAmount / variantPrice).toFixed(2)} → rounded to ${quantity}`,
+      });
+
+      // Validate the calculated total matches (within 1 cent tolerance)
+      const difference = Math.abs(calculatedTotal - customAmount);
+      
+      if (difference > 0.01) {
+        toast({
+          title: "Amount adjustment",
+          description: `Using closest amount: $${calculatedTotal.toFixed(2)}`,
+        });
+      }
+    } 
+    // Default: use first available variant
+    else {
+      console.log('🔵 Using default variant (no tier or custom amount)');
+      variant = getDefaultVariant(product);
+      if (!variant) {
+        toast({
+          title: "Error",
+          description: "No available variant found",
+          variant: "destructive",
+        });
+        return;
+      }
+      quantity = 1;
+    }
+
     if (!variant) {
       toast({
         title: "Error",
@@ -278,28 +393,56 @@ const ProjectDetail = () => {
       return;
     }
 
-    const quantity = selectedTier ? 1 : (parseInt(donationAmount) || 1);
+    // Add attributes for custom amount variants to store original donation amount
+    const attributes: Array<{ key: string; value: string }> = [];
+    if (isCustomAmountVariant) {
+      attributes.push({
+        key: '_custom_donation_amount',
+        value: customAmount.toFixed(2),
+      });
+      attributes.push({
+        key: '_hide_quantity',
+        value: 'true',
+      });
+    }
+    
+    const cartInput = {
+      merchandiseId: variant.id,
+      quantity: quantity,
+      attributes: attributes.length > 0 ? attributes : undefined,
+    };
+    
+    console.log('🛒 Sending to cart:', cartInput);
     
     addToCart(
+      cartInput,
       {
-        merchandiseId: variant.id,
-        quantity: quantity,
-      },
-      {
-        onSuccess: () => {
+        onSuccess: (cart) => {
+          const totalAmount = (quantity * parseFloat(variant!.price.amount)).toFixed(2);
+          console.log('✅ Cart updated:', {
+            cartId: cart.id,
+            totalQuantity: cart.totalQuantity,
+            totalAmount: cart.cost?.totalAmount?.amount,
+            lines: cart.lines?.edges?.map(edge => ({
+              id: edge.node.id,
+              quantity: edge.node.quantity,
+              cost: edge.node.cost.totalAmount.amount,
+              variant: edge.node.merchandise.id,
+            })),
+          });
           toast({
             title: "Added to cart!",
-            description: `${product.title} has been added to your cart.`,
+            description: `$${totalAmount} donation added to your cart.`,
           });
           setDonationAmount("");
           setSelectedTier(null);
         },
         onError: (error) => {
-          toast({
+    toast({
             title: "Error",
             description: error.message,
             variant: "destructive",
-          });
+    });
         },
       }
     );
@@ -396,30 +539,30 @@ const ProjectDetail = () => {
               <div className="flex flex-wrap items-center gap-6 text-muted-foreground">
                 {/* Team Members Avatars */}
                 {projectData.team.length > 0 && (
-                  <div className="flex items-center gap-3">
-                    <div className="flex -space-x-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex -space-x-3">
                       {projectData.team.slice(0, 5).map((member, index) => (
-                        <div
-                          key={index}
-                          className="relative group"
-                          style={{ zIndex: projectData.team.length - index }}
-                        >
-                          <img
-                            src={member.image}
-                            alt={member.name}
-                            className="w-10 h-10 rounded-full border-3 border-background object-cover ring-2 ring-border transition-transform hover:scale-110 hover:z-50"
-                            title={`${member.name} - ${member.role}`}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <div className="text-sm hidden sm:block">
-                      <p className="font-semibold text-foreground">Project Team</p>
-                      <p className="text-muted-foreground text-xs">{projectData.team.length} members</p>
-                    </div>
+                      <div
+                        key={index}
+                        className="relative group"
+                        style={{ zIndex: projectData.team.length - index }}
+                      >
+                        <img
+                          src={member.image}
+                          alt={member.name}
+                          className="w-10 h-10 rounded-full border-3 border-background object-cover ring-2 ring-border transition-transform hover:scale-110 hover:z-50"
+                          title={`${member.name} - ${member.role}`}
+                        />
+                      </div>
+                    ))}
                   </div>
+                  <div className="text-sm hidden sm:block">
+                    <p className="font-semibold text-foreground">Project Team</p>
+                    <p className="text-muted-foreground text-xs">{projectData.team.length} members</p>
+                  </div>
+                </div>
                 )}
-                
+
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   <span>{projectData.location}</span>
@@ -447,9 +590,9 @@ const ProjectDetail = () => {
                 <div className="prose prose-lg max-w-none">
                   {projectData.story ? (
                     projectData.story.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
-                      <p key={index} className="text-foreground leading-relaxed mb-4">
+                    <p key={index} className="text-foreground leading-relaxed mb-4">
                         {paragraph.trim()}
-                      </p>
+                    </p>
                     ))
                   ) : (
                     <p className="text-foreground leading-relaxed">No story available for this project.</p>
@@ -463,85 +606,85 @@ const ProjectDetail = () => {
                     <p className="text-muted-foreground">No updates yet. Check back soon!</p>
                   </div>
                 ) : (
-                  <div className="relative py-4">
-                    {/* Vertical Timeline Line */}
-                    <div className="absolute left-[23px] top-0 bottom-0 w-1 bg-gradient-to-b from-success via-border to-muted rounded-full" />
-                    
-                    <div className="space-y-12">
-                      {projectData.updates.map((update, index) => (
-                        <div 
-                          key={index} 
-                          className="relative animate-slide-up"
-                          style={{ animationDelay: `${index * 100}ms` }}
-                        >
-                          {/* Timeline Dot with Pulse Effect */}
-                          <div className="absolute left-0 top-0 flex items-start">
-                            <div className={`relative w-12 h-12 rounded-full border-4 border-background flex items-center justify-center shadow-lg z-10 ${
-                              update.completed 
-                                ? 'bg-success' 
-                                : update.status === 'in-progress'
-                                ? 'bg-warning'
-                                : 'bg-muted'
-                            }`}>
-                              {update.completed ? (
-                                <CheckCircle2 className="h-6 w-6 text-white" />
-                              ) : update.status === 'in-progress' ? (
-                                <Clock className="h-5 w-5 text-warning-foreground" />
-                              ) : (
-                                <Clock className="h-5 w-5 text-muted-foreground" />
-                              )}
-                            </div>
-                            {update.completed && (
-                              <div className="absolute inset-0 w-12 h-12 rounded-full bg-success/20 animate-pulse-gentle" />
-                            )}
-                            {update.status === 'in-progress' && (
-                              <div className="absolute inset-0 w-12 h-12 rounded-full bg-warning/20 animate-pulse-gentle" />
+                <div className="relative py-4">
+                  {/* Vertical Timeline Line */}
+                  <div className="absolute left-[23px] top-0 bottom-0 w-1 bg-gradient-to-b from-success via-border to-muted rounded-full" />
+                  
+                  <div className="space-y-12">
+                    {projectData.updates.map((update, index) => (
+                      <div 
+                        key={index} 
+                        className="relative animate-slide-up"
+                        style={{ animationDelay: `${index * 100}ms` }}
+                      >
+                        {/* Timeline Dot with Pulse Effect */}
+                        <div className="absolute left-0 top-0 flex items-start">
+                          <div className={`relative w-12 h-12 rounded-full border-4 border-background flex items-center justify-center shadow-lg z-10 ${
+                            update.completed 
+                              ? 'bg-success' 
+                              : update.status === 'in-progress'
+                              ? 'bg-warning'
+                              : 'bg-muted'
+                          }`}>
+                            {update.completed ? (
+                              <CheckCircle2 className="h-6 w-6 text-white" />
+                            ) : update.status === 'in-progress' ? (
+                              <Clock className="h-5 w-5 text-warning-foreground" />
+                            ) : (
+                              <Clock className="h-5 w-5 text-muted-foreground" />
                             )}
                           </div>
-
-                          {/* Connecting Line to Card */}
-                          <div className="absolute left-12 top-6 w-8 h-0.5 bg-border" />
-
-                          {/* Content Card */}
-                          <div className="ml-20">
-                            <Card className={`transition-all hover:shadow-lg ${
-                              update.completed 
-                                ? 'border-success/30 bg-success/5' 
-                                : update.status === 'in-progress'
-                                ? 'border-warning/30 bg-warning/5'
-                                : 'border-border'
-                            }`}>
-                              <CardHeader className="pb-3">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                                    <Calendar className="h-4 w-4" />
-                                    <span>{update.date}</span>
-                                  </div>
-                                  {update.completed && (
-                                    <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-success text-white shadow-sm">
-                                      ✓ COMPLETED
-                                    </span>
-                                  )}
-                                  {update.status === 'in-progress' && (
-                                    <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-warning text-warning-foreground shadow-sm">
-                                      IN PROGRESS
-                                    </span>
-                                  )}
-                                </div>
-                                <CardTitle className="text-xl">{update.title}</CardTitle>
-                              </CardHeader>
-                              <CardContent>
-                                <p className="text-foreground/80 leading-relaxed">{update.description}</p>
-                              </CardContent>
-                            </Card>
-                          </div>
+                          {update.completed && (
+                            <div className="absolute inset-0 w-12 h-12 rounded-full bg-success/20 animate-pulse-gentle" />
+                          )}
+                          {update.status === 'in-progress' && (
+                            <div className="absolute inset-0 w-12 h-12 rounded-full bg-warning/20 animate-pulse-gentle" />
+                          )}
                         </div>
-                      ))}
-                    </div>
-                    
-                    {/* Timeline End Cap */}
-                    <div className="absolute left-[15px] bottom-0 w-4 h-4 rounded-full bg-muted border-4 border-background" />
+
+                        {/* Connecting Line to Card */}
+                        <div className="absolute left-12 top-6 w-8 h-0.5 bg-border" />
+
+                        {/* Content Card */}
+                        <div className="ml-20">
+                          <Card className={`transition-all hover:shadow-lg ${
+                            update.completed 
+                              ? 'border-success/30 bg-success/5' 
+                              : update.status === 'in-progress'
+                              ? 'border-warning/30 bg-warning/5'
+                              : 'border-border'
+                          }`}>
+                            <CardHeader className="pb-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                                  <Calendar className="h-4 w-4" />
+                                  <span>{update.date}</span>
+                                </div>
+                                {update.completed && (
+                                  <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-success text-white shadow-sm">
+                                    ✓ COMPLETED
+                                  </span>
+                                )}
+                                {update.status === 'in-progress' && (
+                                  <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-warning text-warning-foreground shadow-sm">
+                                    IN PROGRESS
+                                  </span>
+                                )}
+                              </div>
+                              <CardTitle className="text-xl">{update.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-foreground/80 leading-relaxed">{update.description}</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                  
+                  {/* Timeline End Cap */}
+                  <div className="absolute left-[15px] bottom-0 w-4 h-4 rounded-full bg-muted border-4 border-background" />
+                </div>
                 )}
               </TabsContent>
               
@@ -716,15 +859,15 @@ const ProjectDetail = () => {
                     </>
                   ) : (
                     <>
-                      <Heart className="mr-2 h-5 w-5" />
-                      Donate Now
+                  <Heart className="mr-2 h-5 w-5" />
+                  Donate Now
                     </>
                   )}
                 </Button>
 
                 {/* Share Button */}
                 <Button 
-                  size="lg"
+                  size="lg" 
                   variant="outline" 
                   className="w-full"
                   onClick={handleShare}

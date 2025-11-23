@@ -117,6 +117,10 @@ export interface CartLine {
   merchandise: {
     id: string;
     title: string;
+    price?: {
+      amount: string;
+      currencyCode: string;
+    };
     selectedOptions: Array<{
       name: string;
       value: string;
