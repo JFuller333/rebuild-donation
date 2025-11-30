@@ -294,13 +294,30 @@ const AdminDashboard = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!editingProject && !formData.shopify_product_handle) {
+      toast({
+        title: "Shopify product required",
+        description: "Select a Shopify product to link this project.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const normalizedGoal = Number(formData.goal_amount) || 0;
+    const normalizedDays = formData.days_left ? Number(formData.days_left) : null;
+
+    const resolvedId =
+      editingProject?.id ||
+      formData.shopify_product_handle ||
+      formData.title.trim().toLowerCase().replace(/\s+/g, "-");
+
     const projectData = {
       title: formData.title,
       description: formData.description,
       location: formData.location,
-      goal_amount: parseFloat(formData.goal_amount),
+      goal_amount: normalizedGoal,
       image_url: formData.image_url || null,
-      days_left: formData.days_left ? parseInt(formData.days_left) : null,
+      days_left: normalizedDays,
       raised_amount: editingProject?.raised_amount || 0,
       donor_count: editingProject?.donor_count || 0,
       status: "active",
@@ -330,6 +347,7 @@ const AdminDashboard = () => {
       const { error } = await supabase
         .from("projects")
         .insert({
+          id: resolvedId,
           title: projectData.title,
           description: projectData.description,
           location: projectData.location,
@@ -359,6 +377,27 @@ const AdminDashboard = () => {
 
     resetForm();
     fetchProjects();
+  };
+
+  const handleShopifyProductSelection = (handle: string) => {
+    const product = productsData?.edges.find(({ node }) => node.handle === handle)?.node;
+
+    setFormData((prev) => ({
+      ...prev,
+      shopify_product_handle: handle,
+      title: editingProject ? prev.title : product?.title || prev.title,
+      description: editingProject
+        ? prev.description
+        : prev.description ||
+          product?.description?.replace(/<[^>]*>/g, "").slice(0, 500) ||
+          "",
+      image_url: editingProject ? prev.image_url : prev.image_url || product?.images.edges[0]?.node?.url || "",
+      location: editingProject ? prev.location : prev.location || product?.vendor || product?.productType || "",
+      goal_amount: editingProject
+        ? prev.goal_amount
+        : prev.goal_amount ||
+          (product ? parseFloat(product.priceRange.minVariantPrice.amount).toString() : prev.goal_amount),
+    }));
   };
 
   const handleEdit = (project: Project) => {
@@ -777,13 +816,13 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="page-shell py-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-          <Button onClick={() => setShowCreateForm(true)}>
+          {/* <Button onClick={() => setShowCreateForm(true)}>
             <Plus className="mr-2 h-4 w-4" />
             New Project
-          </Button>
+          </Button> */}
         </div>
 
         {/* Stats */}
@@ -820,7 +859,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Create/Edit Form */}
-        {showCreateForm && (
+        {/* {showCreateForm && (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle>{editingProject ? "Edit Project" : "Create New Project"}</CardTitle>
@@ -834,7 +873,13 @@ const AdminDashboard = () => {
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
+                    disabled={!!formData.shopify_product_handle && !editingProject}
                   />
+                  {formData.shopify_product_handle && !editingProject && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Title is synced from the selected Shopify product.
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -844,7 +889,13 @@ const AdminDashboard = () => {
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={4}
+                    disabled={!!formData.shopify_product_handle && !editingProject}
                   />
+                  {formData.shopify_product_handle && !editingProject && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Description is synced from the selected Shopify product.
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
@@ -896,7 +947,7 @@ const AdminDashboard = () => {
                   <div className="flex gap-2">
                     <Select
                       value={formData.shopify_product_handle}
-                      onValueChange={(value) => setFormData({ ...formData, shopify_product_handle: value })}
+                      onValueChange={(value) => handleShopifyProductSelection(value)}
                     >
                       <SelectTrigger className="flex-1">
                         <SelectValue placeholder="Select a Shopify product" />
@@ -919,6 +970,7 @@ const AdminDashboard = () => {
                       id="shopify_product_handle"
                       value={formData.shopify_product_handle}
                       onChange={(e) => setFormData({ ...formData, shopify_product_handle: e.target.value })}
+                      onBlur={(e) => e.target.value && handleShopifyProductSelection(e.target.value)}
                       placeholder="Or type handle manually"
                       className="flex-1"
                     />
@@ -939,7 +991,7 @@ const AdminDashboard = () => {
               </form>
             </CardContent>
           </Card>
-        )}
+        )} */}
 
         {/* Project Updates Section */}
         <div className="mb-8">

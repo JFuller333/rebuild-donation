@@ -66,10 +66,11 @@ ALTER TABLE public.project_impact_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.project_team_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.project_partners ENABLE ROW LEVEL SECURITY;
 
--- Policies for project_progress_gallery
+DROP POLICY IF EXISTS "Anyone can view progress gallery" ON public.project_progress_gallery;
 CREATE POLICY "Anyone can view progress gallery"
   ON public.project_progress_gallery FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage progress gallery" ON public.project_progress_gallery;
 CREATE POLICY "Admins can manage progress gallery"
   ON public.project_progress_gallery FOR ALL
   TO authenticated
@@ -77,9 +78,11 @@ CREATE POLICY "Admins can manage progress gallery"
   WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
 -- Policies for project_impact_items
+DROP POLICY IF EXISTS "Anyone can view impact items" ON public.project_impact_items;
 CREATE POLICY "Anyone can view impact items"
   ON public.project_impact_items FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage impact items" ON public.project_impact_items;
 CREATE POLICY "Admins can manage impact items"
   ON public.project_impact_items FOR ALL
   TO authenticated
@@ -87,9 +90,11 @@ CREATE POLICY "Admins can manage impact items"
   WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
 -- Policies for project_team_members
+DROP POLICY IF EXISTS "Anyone can view team members" ON public.project_team_members;
 CREATE POLICY "Anyone can view team members"
   ON public.project_team_members FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage team members" ON public.project_team_members;
 CREATE POLICY "Admins can manage team members"
   ON public.project_team_members FOR ALL
   TO authenticated
@@ -97,9 +102,11 @@ CREATE POLICY "Admins can manage team members"
   WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
 -- Policies for project_partners
+DROP POLICY IF EXISTS "Anyone can view partners" ON public.project_partners;
 CREATE POLICY "Anyone can view partners"
   ON public.project_partners FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Admins can manage partners" ON public.project_partners;
 CREATE POLICY "Admins can manage partners"
   ON public.project_partners FOR ALL
   TO authenticated
@@ -107,21 +114,25 @@ CREATE POLICY "Admins can manage partners"
   WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
 -- Triggers to update updated_at
+DROP TRIGGER IF EXISTS update_progress_gallery_updated_at ON public.project_progress_gallery;
 CREATE TRIGGER update_progress_gallery_updated_at
   BEFORE UPDATE ON public.project_progress_gallery
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_impact_items_updated_at ON public.project_impact_items;
 CREATE TRIGGER update_impact_items_updated_at
   BEFORE UPDATE ON public.project_impact_items
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_team_members_updated_at ON public.project_team_members;
 CREATE TRIGGER update_team_members_updated_at
   BEFORE UPDATE ON public.project_team_members
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_partners_updated_at ON public.project_partners;
 CREATE TRIGGER update_partners_updated_at
   BEFORE UPDATE ON public.project_partners
   FOR EACH ROW

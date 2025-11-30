@@ -9,7 +9,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Civic renewal color system */
-    --background: 60 17% 97%;
+    --background: 0 0% 100%;
     --foreground: 144 15% 20%;
 
     --card: 0 0% 100%;
@@ -112,11 +112,15 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-white text-foreground font-sans;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
+  }
+
+  .page-shell {
+    @apply w-full max-w-6xl mx-auto px-6 sm:px-8 lg:px-16;
   }
 }
 

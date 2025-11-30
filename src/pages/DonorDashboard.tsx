@@ -115,7 +115,7 @@ const DonorDashboard = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
+        <div className="page-shell py-16 text-center">
           <p className="text-muted-foreground">Loading your dashboard...</p>
         </div>
       </div>
@@ -126,7 +126,7 @@ const DonorDashboard = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="page-shell py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold mb-2">Welcome back, {userProfile?.full_name || "Donor"}!</h1>

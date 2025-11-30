@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -78,6 +77,14 @@ const ProjectDetail = () => {
     });
   }, [productHandle, productData, product, productLoading, productError]);
   
+  // Fetch project metrics
+  const [projectRecord, setProjectRecord] = useState<{
+    goal_amount: number | null;
+    raised_amount: number | null;
+    donor_count: number | null;
+    donation_count: number | null;
+  } | null>(null);
+
   // Fetch Supabase updates
   const [updates, setUpdates] = useState<ProjectUpdate[]>([]);
   const [updatesLoading, setUpdatesLoading] = useState(true);
@@ -116,6 +123,28 @@ const ProjectDetail = () => {
     };
 
     fetchUpdates();
+  }, [productHandle]);
+
+  // Fetch project metrics from Supabase
+  useEffect(() => {
+    if (!productHandle) return;
+
+    const fetchProjectMetrics = async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("goal_amount, raised_amount, donor_count, donation_count, shopify_product_handle")
+        .eq("shopify_product_handle", productHandle)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching project metrics:", error);
+        return;
+      }
+
+      setProjectRecord(data);
+    };
+
+    fetchProjectMetrics();
   }, [productHandle]);
 
   // Fetch recent donors from Supabase
@@ -235,9 +264,9 @@ const ProjectDetail = () => {
     title: product.title,
     location: product.vendor || product.productType || "Shop",
     image: getProductImageUrl(product, 0),
-    raised: 0, // Will calculate from donations
-    goal: parseFloat(product.priceRange?.minVariantPrice?.amount || "0"),
-    donors: recentDonors.length,
+    raised: projectRecord?.raised_amount ?? 0,
+    goal: projectRecord?.goal_amount ?? parseFloat(product.priceRange?.minVariantPrice?.amount || "0"),
+    donors: projectRecord?.donation_count ?? recentDonors.length,
     daysLeft: null, // Can add from metafields later
     story: (product.description || product.descriptionHtml?.replace(/<[^>]*>/g, '') || '').replace(/\n\n+/g, '\n\n'),
     impact: impactItems.length > 0 ? impactItems : [
@@ -490,7 +519,7 @@ const ProjectDetail = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-20 text-center">
+        <div className="w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-20 text-center">
           <p className="text-destructive mb-4">Project not found</p>
           <p className="text-sm text-muted-foreground mb-4">
             {productError ? `Error: ${productError.message}` : `Product handle: ${productHandle || 'none'}`}
@@ -502,13 +531,16 @@ const ProjectDetail = () => {
   }
 
   const progress = projectData.goal > 0 ? (projectData.raised / projectData.goal) * 100 : 0;
-  const remaining = projectData.goal - projectData.raised;
+  const progressDisplay = Math.min(Math.round(progress), 100);
+  const remainingRaw = projectData.goal - projectData.raised;
+  const remaining = Math.max(remainingRaw, 0);
+  const goalReached = remainingRaw <= 1;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       <Header />
       
-      <div className="mx-auto px-4 py-8 max-w-[1600px]">
+      <div className="w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
         <Button 
           variant="ghost" 
           onClick={() => navigate("/")}
@@ -774,58 +806,67 @@ const ProjectDetail = () => {
           {/* Sidebar - 1/3 width */}
           <div className="space-y-6">
             {/* Sticky Donation Card */}
-            <Card className="sticky top-24">
-              <CardContent className="pt-6 space-y-6">
+            <Card className="sticky top-24 rounded-3xl border border-border/60 shadow-lg">
+              <CardContent className="pt-6 space-y-5">
                 {/* Progress Section */}
-                <div className="space-y-4">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-3xl font-bold text-primary">
-                      ${projectData.raised.toLocaleString()}
-                    </span>
-                    <span className="text-muted-foreground">
-                      of ${projectData.goal.toLocaleString()}
-                    </span>
+                <div className="flex items-center gap-6">
+                  <div className="relative w-24 h-24">
+                    <div
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        background: `conic-gradient(#7ed957 ${progressDisplay * 3.6}deg, #e5e7eb 0deg)`,
+                      }}
+                    />
+                    <div className="absolute inset-2 rounded-full bg-white shadow-inner flex items-center justify-center">
+                      <span className="text-lg font-bold text-foreground">{progressDisplay}%</span>
+                    </div>
                   </div>
-                  
-                  <Progress value={progress} className="h-3" />
-                  
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {projectData.donors} donations
-                    </span>
-                    <span className="font-semibold text-foreground">
-                      ${remaining.toLocaleString()} to go
-                    </span>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-3xl font-bold text-primary">
+                        ${projectData.raised.toLocaleString()}
+                        <span className="text-lg font-semibold text-foreground/80 ml-2">raised</span>
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                      <span className="underline decoration-dotted">
+                        ${projectData.goal.toLocaleString()} goal
+                      </span>
+                      <span>•</span>
+                      <span>{projectData.donors} donations</span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Donation Tiers */}
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   <Label className="text-base font-semibold">Choose an amount</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {projectData.donationTiers.map((tier) => (
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {projectData.donationTiers
+                      .filter((tier) => tier.amount > 0.01)
+                      .map((tier) => (
                       <button
                         key={tier.amount}
                         onClick={() => {
                           setSelectedTier(tier.amount);
                           setDonationAmount("");
                         }}
-                        className={`p-3 rounded-lg border-2 transition-all text-left ${
+                        className={`px-3 py-2 rounded-2xl border transition-all text-left min-w-[95px] ${
                           selectedTier === tier.amount
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
+                            ? "border-primary bg-primary/5 shadow-inner"
+                            : "border-border hover:border-primary/40"
                         }`}
                       >
-                        <div className="font-bold text-lg">${tier.amount}</div>
-                        <div className="text-xs text-muted-foreground mt-1">{tier.label}</div>
+                        <div className="font-semibold text-sm">${tier.amount}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5">{tier.label}</div>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Custom Amount */}
-                <div className="space-y-2">
-                  <Label htmlFor="custom-amount">Or enter custom amount</Label>
+                <div className="space-y-1 -mt-4">
+                  <Label htmlFor="custom-amount">Custom donation amount</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                       $
@@ -839,45 +880,65 @@ const ProjectDetail = () => {
                         setDonationAmount(e.target.value);
                         setSelectedTier(null);
                       }}
-                      className="pl-6"
+                      className="pl-6 rounded-2xl"
                       min="1"
                     />
                   </div>
                 </div>
 
-                {/* Donation Button */}
-                <Button 
-                  size="lg" 
-                  className="w-full text-base font-semibold"
-                  onClick={handleAddToCart}
-                  disabled={isAddingToCart || !product?.availableForSale}
-                >
-                  {isAddingToCart ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                  <Heart className="mr-2 h-5 w-5" />
-                  Donate Now
-                    </>
-                  )}
-                </Button>
+                {/* Share/Donate buttons */}
+                <div className="space-y-3">
+                  <Button
+                    className="w-full rounded-full bg-emerald-900 text-lime-100 hover:bg-emerald-800 transition"
+                    size="lg"
+                    onClick={handleShare}
+                  >
+                    Share
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="w-full rounded-full bg-lime-300 text-emerald-900 font-semibold text-base hover:bg-lime-200"
+                    onClick={handleAddToCart}
+                    disabled={isAddingToCart || !product?.availableForSale}
+                  >
+                    {isAddingToCart ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Heart className="mr-2 h-5 w-5" />
+                        Donate now
+                      </>
+                    )}
+                  </Button>
+                </div>
 
-                {/* Share Button */}
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={handleShare}
-                >
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share This Project
-                </Button>
+                {/* Recent donors preview */}
+                {projectData.recentDonors.length > 0 && (
+                  <div className="pt-4 border-t border-border/70 space-y-4">
+                    {projectData.recentDonors.slice(0, 5).map((donor, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                            <Heart className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-foreground">{donor.name}</p>
+                            <p className="text-xs text-muted-foreground">{donor.time}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-foreground">${donor.amount.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Tax Deductible Note */}
-                <p className="text-xs text-center text-muted-foreground pt-4 border-t">
+                <p className="text-xs text-center text-muted-foreground pt-2 border-t">
                   Your donation is tax-deductible. <br />
                   Tax ID: 12-3456789
                 </p>
@@ -888,33 +949,33 @@ const ProjectDetail = () => {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 mt-20">
+      <footer className="border-t border-black bg-black text-white py-12 mt-20">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
               <h3 className="text-xl font-bold mb-4">Rebuild Together</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-sm text-white/80 leading-relaxed">
                 Empowering communities through transparent, impactful neighborhood development projects.
               </p>
             </div>
             <div>
               <h4 className="font-semibold mb-3">Quick Links</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Our Projects</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Get Involved</a></li>
+              <ul className="space-y-2 text-sm text-white/80">
+                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Our Projects</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Get Involved</a></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-3">Contact</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <ul className="space-y-2 text-sm text-white/80">
                 <li>hello@rebuilttogether.org</li>
                 <li>(555) 123-4567</li>
                 <li>Tax ID: 12-3456789</li>
               </ul>
             </div>
           </div>
-          <div className="pt-8 border-t border-border text-center text-sm text-muted-foreground">
+          <div className="pt-8 border-t border-white/10 text-center text-sm text-white/80">
             <p>© 2024 Rebuild Together. 501(c)(3) nonprofit organization. All donations are tax-deductible.</p>
           </div>
         </div>

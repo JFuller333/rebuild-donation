@@ -16,14 +16,17 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
+DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
 CREATE POLICY "Users can view own profile"
   ON public.profiles FOR SELECT
   USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
 CREATE POLICY "Users can insert own profile"
   ON public.profiles FOR INSERT
   WITH CHECK (auth.uid() = id);
@@ -45,6 +48,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 
 -- Projects are publicly readable
+DROP POLICY IF EXISTS "Anyone can view projects" ON public.projects;
 CREATE POLICY "Anyone can view projects"
   ON public.projects FOR SELECT
   USING (true);
@@ -67,10 +71,12 @@ CREATE TABLE IF NOT EXISTS public.donations (
 ALTER TABLE public.donations ENABLE ROW LEVEL SECURITY;
 
 -- Donations policies
+DROP POLICY IF EXISTS "Users can view own donations" ON public.donations;
 CREATE POLICY "Users can view own donations"
   ON public.donations FOR SELECT
   USING (auth.uid() = donor_id);
 
+DROP POLICY IF EXISTS "Users can insert own donations" ON public.donations;
 CREATE POLICY "Users can insert own donations"
   ON public.donations FOR INSERT
   WITH CHECK (auth.uid() = donor_id);
@@ -90,6 +96,7 @@ CREATE TABLE IF NOT EXISTS public.tax_receipts (
 ALTER TABLE public.tax_receipts ENABLE ROW LEVEL SECURITY;
 
 -- Tax receipts policies
+DROP POLICY IF EXISTS "Users can view own tax receipts" ON public.tax_receipts;
 CREATE POLICY "Users can view own tax receipts"
   ON public.tax_receipts FOR SELECT
   USING (auth.uid() = donor_id);
@@ -131,16 +138,19 @@ END;
 $$;
 
 -- Triggers for updated_at
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON public.profiles;
 CREATE TRIGGER update_profiles_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_projects_updated_at ON public.projects;
 CREATE TRIGGER update_projects_updated_at
   BEFORE UPDATE ON public.projects
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_donations_updated_at ON public.donations;
 CREATE TRIGGER update_donations_updated_at
   BEFORE UPDATE ON public.donations
   FOR EACH ROW

@@ -117,7 +117,9 @@ export type Database = {
           id: string
           image_url: string | null
           location: string | null
+          donation_count: number | null
           raised_amount: number
+          shopify_product_handle: string | null
           status: string | null
           title: string
           updated_at: string | null
@@ -127,10 +129,12 @@ export type Database = {
           days_left?: number | null
           description?: string | null
           donor_count?: number | null
+          donation_count?: number | null
           goal_amount?: number
           id: string
           image_url?: string | null
           location?: string | null
+          shopify_product_handle?: string | null
           raised_amount?: number
           status?: string | null
           title: string
@@ -141,10 +145,12 @@ export type Database = {
           days_left?: number | null
           description?: string | null
           donor_count?: number | null
+          donation_count?: number | null
           goal_amount?: number
           id?: string
           image_url?: string | null
           location?: string | null
+          shopify_product_handle?: string | null
           raised_amount?: number
           status?: string | null
           title?: string

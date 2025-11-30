@@ -27,27 +27,28 @@ ON public.project_updates(shopify_product_handle);
 -- Enable RLS on project_updates
 ALTER TABLE public.project_updates ENABLE ROW LEVEL SECURITY;
 
--- Policy: Anyone can view project updates (public)
+DROP POLICY IF EXISTS "Anyone can view project updates" ON public.project_updates;
 CREATE POLICY "Anyone can view project updates"
   ON public.project_updates
   FOR SELECT
   USING (true);
 
 -- Policy: Admins can insert project updates
+DROP POLICY IF EXISTS "Admins can insert project updates" ON public.project_updates;
 CREATE POLICY "Admins can insert project updates"
   ON public.project_updates
   FOR INSERT
   TO authenticated
   WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
--- Policy: Admins can update project updates
+DROP POLICY IF EXISTS "Admins can update project updates" ON public.project_updates;
 CREATE POLICY "Admins can update project updates"
   ON public.project_updates
   FOR UPDATE
   TO authenticated
   USING (public.has_role(auth.uid(), 'admin'));
 
--- Policy: Admins can delete project updates
+DROP POLICY IF EXISTS "Admins can delete project updates" ON public.project_updates;
 CREATE POLICY "Admins can delete project updates"
   ON public.project_updates
   FOR DELETE
@@ -71,7 +72,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger to automatically update updated_at on project_updates
+DROP TRIGGER IF EXISTS update_project_updates_updated_at ON public.project_updates;
 CREATE TRIGGER update_project_updates_updated_at
   BEFORE UPDATE ON public.project_updates
   FOR EACH ROW

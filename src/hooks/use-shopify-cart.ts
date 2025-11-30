@@ -37,10 +37,7 @@ export function useAddToCart() {
 
   return useMutation({
     mutationFn: async (input: AddToCartInput) => {
-      let cartId = CartStorage.getCartId();
-
-      // If no cart exists, create one
-      if (!cartId) {
+      const createCartWithLine = async () => {
         const result = await cartCreate([input]);
 
         if (result.userErrors.length > 0) {
@@ -52,13 +49,29 @@ export function useAddToCart() {
           throw new Error('Failed to create cart');
         }
 
-        cartId = result.cart.id;
-        CartStorage.setCartId(cartId);
+        const newCartId = result.cart.id;
+        CartStorage.setCartId(newCartId);
         return result.cart;
+      };
+
+      let cartId = CartStorage.getCartId();
+
+      // If no cart exists, create one
+      if (!cartId) {
+        return createCartWithLine();
       }
 
       // Add to existing cart
       const result = await cartLinesAdd(cartId, [input]);
+
+      const cartMissingError = result.userErrors.some((err) =>
+        err?.message?.toLowerCase().includes("specified cart does not exist")
+      );
+
+      if (cartMissingError) {
+        CartStorage.clearCartId();
+        return createCartWithLine();
+      }
 
       if (result.userErrors.length > 0) {
         const errorMessage = handleShopifyError(result);
@@ -66,7 +79,8 @@ export function useAddToCart() {
       }
 
       if (!result.cart) {
-        throw new Error('Failed to add item to cart');
+        CartStorage.clearCartId();
+        return createCartWithLine();
       }
 
       return result.cart;

@@ -16,8 +16,8 @@ interface ProjectCardProps {
 
 export const ProjectCard = ({ id, title, location, description, image, raised, goal }: ProjectCardProps) => {
   const navigate = useNavigate();
-  const progress = (raised / goal) * 100;
-  const remaining = goal - raised;
+  const progress = goal > 0 ? Math.min((raised / goal) * 100, 100) : 0;
+  const remaining = Math.max(goal - raised, 0);
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group h-full flex flex-col">
@@ -50,9 +50,6 @@ export const ProjectCard = ({ id, title, location, description, image, raised, g
             </span>
           </div>
           <Progress value={progress} className="h-2" />
-          <p className="text-sm text-muted-foreground">
-            ${remaining.toLocaleString()} still needed
-          </p>
         </div>
       </CardContent>
       
@@ -62,7 +59,7 @@ export const ProjectCard = ({ id, title, location, description, image, raised, g
           size="lg"
           onClick={() => navigate(`/products/${id}`)}
         >
-          View Details
+          View Project
         </Button>
       </CardFooter>
     </Card>

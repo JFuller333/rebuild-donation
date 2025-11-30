@@ -1,8 +1,13 @@
--- Create enum for user roles
-CREATE TYPE public.app_role AS ENUM ('admin', 'donor');
+DO $$
+BEGIN
+  CREATE TYPE public.app_role AS ENUM ('admin', 'donor');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END;
+$$;
 
 -- Create user_roles table (separate from profiles for security)
-CREATE TABLE public.user_roles (
+CREATE TABLE IF NOT EXISTS public.user_roles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   role app_role NOT NULL,
@@ -29,7 +34,7 @@ AS $$
   )
 $$;
 
--- RLS Policy: Users can view their own roles
+DROP POLICY IF EXISTS "Users can view own roles" ON public.user_roles;
 CREATE POLICY "Users can view own roles"
 ON public.user_roles
 FOR SELECT
@@ -37,6 +42,7 @@ TO authenticated
 USING (auth.uid() = user_id);
 
 -- RLS Policy: Admins can view all roles
+DROP POLICY IF EXISTS "Admins can view all roles" ON public.user_roles;
 CREATE POLICY "Admins can view all roles"
 ON public.user_roles
 FOR SELECT
@@ -49,7 +55,7 @@ ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active' CHECK (status IN ('active'
 ADD COLUMN IF NOT EXISTS days_left INTEGER,
 ADD COLUMN IF NOT EXISTS donor_count INTEGER DEFAULT 0;
 
--- RLS Policy: Admins can insert projects
+DROP POLICY IF EXISTS "Admins can insert projects" ON public.projects;
 CREATE POLICY "Admins can insert projects"
 ON public.projects
 FOR INSERT
@@ -57,6 +63,7 @@ TO authenticated
 WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
 -- RLS Policy: Admins can update projects
+DROP POLICY IF EXISTS "Admins can update projects" ON public.projects;
 CREATE POLICY "Admins can update projects"
 ON public.projects
 FOR UPDATE
@@ -64,15 +71,21 @@ TO authenticated
 USING (public.has_role(auth.uid(), 'admin'));
 
 -- RLS Policy: Admins can delete projects
+DROP POLICY IF EXISTS "Admins can delete projects" ON public.projects;
 CREATE POLICY "Admins can delete projects"
 ON public.projects
 FOR DELETE
 TO authenticated
 USING (public.has_role(auth.uid(), 'admin'));
 
--- Enable realtime for projects table
 ALTER TABLE public.projects REPLICA IDENTITY FULL;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.projects;
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.projects;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END;
+$$;
 
 -- Function to automatically assign donor role on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user_role()
@@ -89,7 +102,15 @@ BEGIN
 END;
 $$;
 
--- Trigger to assign role on user creation
-CREATE TRIGGER on_auth_user_created_role
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user_role();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger
+    WHERE tgname = 'on_auth_user_created_role'
+  ) THEN
+    CREATE TRIGGER on_auth_user_created_role
+      AFTER INSERT ON auth.users
+      FOR EACH ROW EXECUTE FUNCTION public.handle_new_user_role();
+  END IF;
+END;
+$$;
