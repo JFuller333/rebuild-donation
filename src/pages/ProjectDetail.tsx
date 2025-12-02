@@ -465,6 +465,10 @@ const ProjectDetail = () => {
           });
           setDonationAmount("");
           setSelectedTier(null);
+          
+          if (cart.checkoutUrl) {
+            window.location.href = cart.checkoutUrl;
+          }
         },
         onError: (error) => {
     toast({
