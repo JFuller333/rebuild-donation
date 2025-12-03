@@ -100,7 +100,7 @@ Clicks to download PDF
 ## 🎨 Receipt Template
 
 The receipt includes:
-- Organization name: "Rebuild Together"
+- Organization name: "Rebuild Tuskegee"
 - Tax ID: 12-3456789 (update this!)
 - Receipt number
 - Donation date

@@ -19,7 +19,7 @@ All colors MUST be HSL.
     --popover-foreground: 144 15% 20%;
 
     /* Primary: Civic Green - growth and renewal */
-    --primary: 144 51% 33%;
+    --primary: 164 86% 16%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary: Soft neutrals for UI surfaces */
@@ -39,28 +39,28 @@ All colors MUST be HSL.
 
     --border: 60 12% 88%;
     --input: 60 12% 88%;
-    --ring: 144 51% 33%;
+    --ring: 164 86% 16%;
 
     --radius: 0.75rem;
 
     /* Additional semantic tokens */
-    --success: 144 51% 33%;
+    --success: 164 86% 16%;
     --warning: 45 93% 64%;
     --info: 210 75% 45%;
 
     /* Progress and impact colors */
     --progress-bg: 60 15% 90%;
-    --progress-fill: 144 51% 33%;
+    --progress-fill: 164 86% 16%;
 
     /* Sidebar tokens */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 144 15% 25%;
-    --sidebar-primary: 144 51% 33%;
+    --sidebar-primary: 164 86% 16%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 60 15% 95%;
     --sidebar-accent-foreground: 144 15% 25%;
     --sidebar-border: 60 12% 88%;
-    --sidebar-ring: 144 51% 33%;
+    --sidebar-ring: 164 86% 16%;
   }
 
   .dark {
@@ -73,7 +73,7 @@ All colors MUST be HSL.
     --popover: 144 15% 13%;
     --popover-foreground: 60 17% 97%;
 
-    --primary: 144 45% 45%;
+    --primary: 164 70% 30%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 144 12% 18%;
@@ -90,19 +90,19 @@ All colors MUST be HSL.
 
     --border: 144 12% 22%;
     --input: 144 12% 22%;
-    --ring: 144 45% 45%;
+    --ring: 164 70% 30%;
 
     --progress-bg: 144 12% 20%;
-    --progress-fill: 144 45% 45%;
+    --progress-fill: 164 70% 30%;
 
     --sidebar-background: 144 15% 10%;
     --sidebar-foreground: 60 17% 90%;
-    --sidebar-primary: 144 45% 45%;
+    --sidebar-primary: 164 70% 30%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 144 12% 18%;
     --sidebar-accent-foreground: 60 17% 90%;
     --sidebar-border: 144 12% 22%;
-    --sidebar-ring: 144 45% 45%;
+    --sidebar-ring: 164 70% 30%;
   }
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import {
   TrendingUp,
   Clock,
   CheckCircle2,
+  Check,
   Camera,
   Loader2
 } from "lucide-react";
@@ -33,6 +34,7 @@ import { getDefaultVariant, getVariantPriceFormatted, getSmallestVariant, getVar
 import { supabase } from "@/integrations/supabase/client";
 import { getProductImageUrl } from "@/lib/shopify-adapters";
 import type { ProductVariant } from "@/integrations/shopify/types";
+import DOMPurify from "dompurify";
 
 interface ProjectUpdate {
   id: string;
@@ -84,7 +86,7 @@ const ProjectDetail = () => {
     donor_count: number | null;
     donation_count: number | null;
   } | null>(null);
-
+  
   // Fetch Supabase updates
   const [updates, setUpdates] = useState<ProjectUpdate[]>([]);
   const [updatesLoading, setUpdatesLoading] = useState(true);
@@ -259,32 +261,64 @@ const ProjectDetail = () => {
   };
 
   // Map Shopify product to project data structure
+  const normalizeStatus = (status: string): "completed" | "in-progress" | "upcoming" | "other" => {
+    const normalized = status?.trim().toLowerCase().replace(/[\s_]+/g, "-");
+    if (normalized === "completed" || normalized === "in-progress" || normalized === "upcoming") {
+      return normalized;
+    }
+    return "other";
+  };
+
+  const sortedUpdates = [...updates].sort((a, b) => {
+    const statusPriority: Record<string, number> = {
+      "completed": 0,
+      "in-progress": 1,
+      "upcoming": 2,
+      "other": 3,
+    };
+
+    const statusDiff = (statusPriority[normalizeStatus(a.status)] ?? 3) - (statusPriority[normalizeStatus(b.status)] ?? 3);
+    if (statusDiff !== 0) return statusDiff;
+
+    const dateA = new Date(a.updated_at || a.date).getTime();
+    const dateB = new Date(b.updated_at || b.date).getTime();
+    return dateB - dateA;
+  });
+
   const projectData = product ? {
     id: product.handle,
     title: product.title,
-    location: product.vendor || product.productType || "Shop",
+    location: (() => {
+      if (projectRecord?.location) return projectRecord.location;
+      if (product.handle === "maple-street-housing" || product.vendor === "rebuild-investor-software") {
+        return "Greenwood Neighborhood";
+      }
+      return product.vendor || product.productType || "Shop";
+    })(),
     image: getProductImageUrl(product, 0),
     raised: projectRecord?.raised_amount ?? 0,
     goal: projectRecord?.goal_amount ?? parseFloat(product.priceRange?.minVariantPrice?.amount || "0"),
     donors: projectRecord?.donation_count ?? recentDonors.length,
     daysLeft: null, // Can add from metafields later
-    story: (product.description || product.descriptionHtml?.replace(/<[^>]*>/g, '') || '').replace(/\n\n+/g, '\n\n'),
+    story: product.descriptionHtml || product.description || "",
     impact: impactItems.length > 0 ? impactItems : [
-      // Fallback to product tags if no impact items in Supabase
-      ...(product.tags?.slice(0, 4).map(tag => `${tag.replace(/-/g, ' ')}`) || [])
+      "Preserves history: Restores Tuskegee’s historic Greenwood community and honors its legacy.",
+      "Strengthens community: Provides pathways to homeownership and long-term stability for faculty, staff, and local professionals.",
+      "Boosts local economy and university: Supports faculty retention, stimulates neighborhood revitalization, and builds generational wealth.",
+      ...(product.tags?.slice(0, 1).map(tag => `${tag.replace(/-/g, ' ')}`) || [])
     ],
-    progressGallery: progressGallery.length > 0 ? progressGallery : (product.images?.edges?.slice(0, 5).map(({ node: image }, index) => ({
+    progressGallery: progressGallery.length > 0 ? progressGallery : (product.images?.edges?.slice(0, 5).map(({ node: image }) => ({
       image: image.url,
-      caption: image.altText || `Image ${index + 1}`,
+      caption: image.altText || "",
       date: new Date().toLocaleDateString()
     })) || []),
     team: teamMembers.length > 0 ? teamMembers : [],
-    updates: updates.map(update => ({
-      date: new Date(update.date).toLocaleDateString(),
+    updates: sortedUpdates.map(update => ({
+      date: new Date(update.updated_at || update.date).toLocaleDateString(),
       title: update.title,
       description: update.description,
-      completed: update.status === 'completed',
-      status: update.status,
+      completed: normalizeStatus(update.status) === 'completed',
+      status: normalizeStatus(update.status),
     })),
     recentDonors: recentDonors,
     donationTiers: product.variants?.edges?.slice(0, 4).map(({ node: variant }) => ({
@@ -294,6 +328,11 @@ const ProjectDetail = () => {
     })) || [],
     partners: partners.length > 0 ? partners : []
   } : null;
+
+  const sanitizedStory = useMemo(
+    () => (projectData?.story ? DOMPurify.sanitize(projectData.story) : ""),
+    [projectData?.story]
+  );
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -540,11 +579,177 @@ const ProjectDetail = () => {
   const remaining = Math.max(remainingRaw, 0);
   const goalReached = remainingRaw <= 1;
 
+  const heroSection = (
+    <div className="space-y-5">
+      <div className="relative h-64 sm:h-80 md:h-96 lg:h-[500px] rounded-xl overflow-hidden">
+        <img
+          src={projectData.image}
+          alt={projectData.title}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="space-y-4 px-1 sm:px-0">
+        <h1 className="px-1 sm:px-0 text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
+          {projectData.title}
+        </h1>
+        <div className="flex flex-wrap items-center gap-4 text-muted-foreground text-sm sm:text-base px-1 sm:px-0">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4" />
+            <span className="font-medium text-foreground">{projectData.location}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            <span>{projectData.donors} donors</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            <span>{projectData.daysLeft || 0} days left</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const donationCard = (
+    <Card className="rounded-3xl border border-border/60 shadow-xl lg:shadow-lg lg:sticky lg:top-24">
+      <CardContent className="pt-6 space-y-5">
+        <div className="flex items-center justify-between gap-4">
+          <div className="relative w-20 h-20 flex-shrink-0">
+            <div
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: `conic-gradient(#064e3b ${progressDisplay * 3.6}deg, #e5e7eb 0deg)`,
+              }}
+            />
+            <div className="absolute inset-2 rounded-full bg-white shadow-inner flex items-center justify-center">
+              <span className="text-base font-bold text-foreground">{progressDisplay}%</span>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <p className="text-3xl font-bold text-primary leading-tight">
+              ${projectData.raised.toLocaleString()}
+              <span className="text-base font-semibold text-foreground/80 ml-2">raised</span>
+            </p>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+              <span className="underline decoration-dotted">
+                ${projectData.goal.toLocaleString()} goal
+              </span>
+              <span>•</span>
+              <span>{projectData.donors} donations</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2.5">
+          <Label className="text-base font-semibold">Choose an amount</Label>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {projectData.donationTiers
+              .filter((tier) => tier.amount > 0.01)
+              .map((tier) => (
+                <button
+                  key={tier.amount}
+                  onClick={() => {
+                    setSelectedTier(tier.amount);
+                    setDonationAmount("");
+                  }}
+                  className={`px-3 py-2 rounded-2xl border transition-all text-left min-w-[95px] ${
+                    selectedTier === tier.amount
+                      ? "border-primary bg-primary/5 shadow-inner"
+                      : "border-border hover:border-primary/40"
+                  }`}
+                >
+                  <div className="font-semibold text-sm">${tier.amount}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">{tier.label}</div>
+                </button>
+              ))}
+          </div>
+        </div>
+
+        <div className="space-y-1 -mt-4">
+          <Label htmlFor="custom-amount" className="text-base font-semibold">
+            Custom donation amount
+          </Label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              $
+            </span>
+            <Input
+              id="custom-amount"
+              type="number"
+              placeholder="Enter amount"
+              value={donationAmount}
+              onChange={(e) => {
+                setDonationAmount(e.target.value);
+                setSelectedTier(null);
+              }}
+              className="pl-6 rounded-2xl"
+              min="1"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <Button
+            className="w-full rounded-full bg-[rgb(6,78,59)] text-white hover:bg-[rgb(16,87,70)] transition"
+            size="lg"
+            onClick={handleShare}
+          >
+            Share
+          </Button>
+          <Button
+            size="lg"
+            className="w-full rounded-full bg-[rgb(203,255,144)] text-[rgb(6,78,59)] font-semibold text-base hover:bg-[rgb(188,241,130)]"
+            onClick={handleAddToCart}
+            disabled={isAddingToCart || !product?.availableForSale}
+          >
+            {isAddingToCart ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <Heart className="mr-2 h-5 w-5" />
+                Donate now
+              </>
+            )}
+          </Button>
+        </div>
+
+        {projectData.recentDonors.length > 0 && (
+          <div className="pt-4 border-t border-border/70 space-y-4">
+            {projectData.recentDonors.slice(0, 5).map((donor, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    <Heart className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">{donor.name}</p>
+                    <p className="text-xs text-muted-foreground">{donor.time}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-foreground">${donor.amount.toLocaleString()}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <p className="text-xs text-center text-muted-foreground pt-2 border-t">
+          Your donation is tax-deductible. <br />
+          Tax ID: 12-3456789
+        </p>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
       
-      <div className="w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 pb-24 lg:pb-12">
         <Button 
           variant="ghost" 
           onClick={() => navigate("/")}
@@ -554,28 +759,23 @@ const ProjectDetail = () => {
           Back to Projects
         </Button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid gap-10 lg:grid-cols-3 lg:items-start">
+          {/* Mobile hero + donation card */}
+          <div className="flex flex-col gap-6 order-1 lg:hidden">
+            {heroSection}
+            {donationCard}
+          </div>
+
           {/* Main Content - 2/3 width */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Hero Image */}
-            <div className="relative h-[400px] md:h-[500px] rounded-xl overflow-hidden">
-              <img 
-                src={projectData.image} 
-                alt={projectData.title}
-                className="w-full h-full object-cover"
-              />
+          <div className="lg:col-span-2 space-y-8 order-2 lg:order-1">
+            {/* Desktop Hero */}
+            <div className="hidden lg:block">
+              {heroSection}
             </div>
 
-            {/* Project Title and Meta */}
-            <div className="space-y-6">
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight pb-2">
-                {projectData.title}
-              </h1>
-              
-              <div className="flex flex-wrap items-center gap-6 text-muted-foreground">
-                {/* Team Members Avatars */}
+            {/* Project Team */}
                 {projectData.team.length > 0 && (
-                <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 pb-2">
                   <div className="flex -space-x-3">
                       {projectData.team.slice(0, 5).map((member, index) => (
                       <div
@@ -599,41 +799,40 @@ const ProjectDetail = () => {
                 </div>
                 )}
 
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>{projectData.location}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  <span>{projectData.donors} donors</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span>{projectData.daysLeft || 0} days left</span>
-                </div>
-              </div>
-            </div>
-
             {/* Tabs Content */}
             <Tabs defaultValue="story" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="story">Story</TabsTrigger>
-                <TabsTrigger value="updates">Updates</TabsTrigger>
-                <TabsTrigger value="donors">Donors</TabsTrigger>
+              <TabsList className="flex w-full flex-wrap gap-2 rounded-[999px] bg-[rgb(10,47,39)]/90 p-1 text-sm text-white md:grid md:grid-cols-3 md:gap-0 shadow-[0_12px_35px_rgba(10,47,39,0.35)]">
+                <TabsTrigger
+                  value="story"
+                  className="rounded-full text-white transition-all data-[state=active]:bg-[rgb(16,87,70)] data-[state=active]:text-white data-[state=active]:shadow-[0_10px_25px_rgba(16,87,70,0.4)]"
+                >
+                  Story
+                </TabsTrigger>
+                <TabsTrigger
+                  value="updates"
+                  className="rounded-full text-white transition-all data-[state=active]:bg-[rgb(16,87,70)] data-[state=active]:text-white data-[state=active]:shadow-[0_10px_25px_rgba(16,87,70,0.4)]"
+                >
+                  Updates
+                </TabsTrigger>
+                <TabsTrigger
+                  value="donors"
+                  className="rounded-full text-white transition-all data-[state=active]:bg-[rgb(16,87,70)] data-[state=active]:text-white data-[state=active]:shadow-[0_10px_25px_rgba(16,87,70,0.4)]"
+                >
+                  Donors
+                </TabsTrigger>
               </TabsList>
               
               <TabsContent value="story" className="space-y-6 mt-6">
-                <div className="prose prose-lg max-w-none">
-                  {projectData.story ? (
-                    projectData.story.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
-                    <p key={index} className="text-foreground leading-relaxed mb-4">
-                        {paragraph.trim()}
-                    </p>
-                    ))
-                  ) : (
-                    <p className="text-foreground leading-relaxed">No story available for this project.</p>
-                  )}
-                </div>
+                {sanitizedStory ? (
+                  <div
+                    className="prose prose-lg max-w-none text-foreground"
+                    dangerouslySetInnerHTML={{ __html: sanitizedStory }}
+                  />
+                ) : (
+                  <p className="text-foreground leading-relaxed">
+                    No story available for this project.
+                  </p>
+                )}
               </TabsContent>
               
               <TabsContent value="updates" className="mt-6">
@@ -657,17 +856,15 @@ const ProjectDetail = () => {
                         <div className="absolute left-0 top-0 flex items-start">
                           <div className={`relative w-12 h-12 rounded-full border-4 border-background flex items-center justify-center shadow-lg z-10 ${
                             update.completed 
-                              ? 'bg-success' 
+                              ? 'bg-[rgb(6,78,59)] text-white' 
                               : update.status === 'in-progress'
-                              ? 'bg-warning'
-                              : 'bg-muted'
+                              ? 'bg-[#facc15] text-[#854d0e]'
+                              : 'bg-muted text-muted-foreground'
                           }`}>
                             {update.completed ? (
-                              <CheckCircle2 className="h-6 w-6 text-white" />
-                            ) : update.status === 'in-progress' ? (
-                              <Clock className="h-5 w-5 text-warning-foreground" />
+                              <Check className="h-6 w-6" />
                             ) : (
-                              <Clock className="h-5 w-5 text-muted-foreground" />
+                              <Clock className="h-5 w-5" />
                             )}
                           </div>
                           {update.completed && (
@@ -697,13 +894,13 @@ const ProjectDetail = () => {
                                   <span>{update.date}</span>
                                 </div>
                                 {update.completed && (
-                                  <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-success text-white shadow-sm">
+                                  <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-[rgb(6,78,59)] text-white shadow-sm">
                                     ✓ COMPLETED
                                   </span>
                                 )}
                                 {update.status === 'in-progress' && (
-                                  <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-warning text-warning-foreground shadow-sm">
-                                    IN PROGRESS
+                                  <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-[#facc15] text-[#854d0e] shadow-sm">
+                                    ⏳ IN PROGRESS
                                   </span>
                                 )}
                               </div>
@@ -747,7 +944,7 @@ const ProjectDetail = () => {
             </Tabs>
 
             {/* Project Impact */}
-            <Card>
+            <Card className="bg-[rgb(203,255,144)]/50 border-none shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
@@ -755,11 +952,14 @@ const ProjectDetail = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-3">
+                <ul className="space-y-3 text-sm sm:text-base">
                   {projectData.impact.map((item, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-success mt-0.5 flex-shrink-0" />
-                      <span className="text-foreground">{item}</span>
+                      <Check className="h-5 w-5 text-[rgb(6,78,59)] mt-0.5 flex-shrink-0" />
+                      <span className="text-foreground">
+                        <span className="font-semibold">{item.split(":")[0]}:</span>
+                        {item.includes(":") ? item.slice(item.indexOf(":") + 1) : ""}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -807,148 +1007,40 @@ const ProjectDetail = () => {
             </Card>
           </div>
 
-          {/* Sidebar - 1/3 width */}
-          <div className="space-y-6">
-            {/* Sticky Donation Card */}
-            <Card className="sticky top-24 rounded-3xl border border-border/60 shadow-lg">
-              <CardContent className="pt-6 space-y-5">
-                {/* Progress Section */}
-                <div className="flex items-center gap-6">
-                  <div className="relative w-24 h-24">
-                    <div
-                      className="absolute inset-0 rounded-full"
-                      style={{
-                        background: `conic-gradient(#7ed957 ${progressDisplay * 3.6}deg, #e5e7eb 0deg)`,
-                      }}
-                    />
-                    <div className="absolute inset-2 rounded-full bg-white shadow-inner flex items-center justify-center">
-                      <span className="text-lg font-bold text-foreground">{progressDisplay}%</span>
-                    </div>
+          {/* Sidebar - desktop donation card */}
+          <div className="hidden lg:block order-3">
+            {donationCard}
                   </div>
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-3xl font-bold text-primary">
-                        ${projectData.raised.toLocaleString()}
-                        <span className="text-lg font-semibold text-foreground/80 ml-2">raised</span>
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
-                      <span className="underline decoration-dotted">
-                        ${projectData.goal.toLocaleString()} goal
-                      </span>
-                      <span>•</span>
-                      <span>{projectData.donors} donations</span>
-                    </div>
                   </div>
                 </div>
 
-                {/* Donation Tiers */}
-                <div className="space-y-2.5">
-                  <Label className="text-base font-semibold">Choose an amount</Label>
-                  <div className="flex gap-2 overflow-x-auto pb-1">
-                    {projectData.donationTiers
-                      .filter((tier) => tier.amount > 0.01)
-                      .map((tier) => (
-                      <button
-                        key={tier.amount}
-                        onClick={() => {
-                          setSelectedTier(tier.amount);
-                          setDonationAmount("");
-                        }}
-                        className={`px-3 py-2 rounded-2xl border transition-all text-left min-w-[95px] ${
-                          selectedTier === tier.amount
-                            ? "border-primary bg-primary/5 shadow-inner"
-                            : "border-border hover:border-primary/40"
-                        }`}
-                      >
-                        <div className="font-semibold text-sm">${tier.amount}</div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">{tier.label}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Custom Amount */}
-                <div className="space-y-1 -mt-4">
-                  <Label htmlFor="custom-amount">Custom donation amount</Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      $
-                    </span>
-                    <Input
-                      id="custom-amount"
-                      type="number"
-                      placeholder="Enter amount"
-                      value={donationAmount}
-                      onChange={(e) => {
-                        setDonationAmount(e.target.value);
-                        setSelectedTier(null);
-                      }}
-                      className="pl-6 rounded-2xl"
-                      min="1"
-                    />
-                  </div>
-                </div>
-
-                {/* Share/Donate buttons */}
-                <div className="space-y-3">
-                  <Button
-                    className="w-full rounded-full bg-emerald-900 text-lime-100 hover:bg-emerald-800 transition"
-                    size="lg"
-                    onClick={handleShare}
-                  >
-                    Share
-                  </Button>
-                  <Button
-                    size="lg"
-                    className="w-full rounded-full bg-lime-300 text-emerald-900 font-semibold text-base hover:bg-lime-200"
-                    onClick={handleAddToCart}
-                    disabled={isAddingToCart || !product?.availableForSale}
-                  >
-                    {isAddingToCart ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Heart className="mr-2 h-5 w-5" />
-                        Donate now
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                {/* Recent donors preview */}
-                {projectData.recentDonors.length > 0 && (
-                  <div className="pt-4 border-t border-border/70 space-y-4">
-                    {projectData.recentDonors.slice(0, 5).map((donor, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                            <Heart className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-foreground">{donor.name}</p>
-                            <p className="text-xs text-muted-foreground">{donor.time}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-foreground">${donor.amount.toLocaleString()}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Tax Deductible Note */}
-                <p className="text-xs text-center text-muted-foreground pt-2 border-t">
-                  Your donation is tax-deductible. <br />
-                  Tax ID: 12-3456789
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+      {/* Mobile Share / Donate CTA */}
+      <div className="fixed bottom-0 left-0 right-0 border-t border-border/70 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 px-4 py-3 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] lg:hidden">
+        <div className="max-w-7xl mx-auto flex gap-3">
+          <Button
+            variant="outline"
+            className="flex-1 rounded-full border-[rgb(6,78,59)] text-[rgb(6,78,59)] font-semibold"
+            onClick={handleShare}
+          >
+            Share
+          </Button>
+                <Button 
+            className="flex-[1.5] rounded-full bg-[rgb(203,255,144)] text-[rgb(6,78,59)] font-semibold hover:bg-[rgb(188,241,130)]"
+                  onClick={handleAddToCart}
+                  disabled={isAddingToCart || !product?.availableForSale}
+                >
+                  {isAddingToCart ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                  <Heart className="mr-2 h-5 w-5" />
+                Donate
+                    </>
+                  )}
+                </Button>
         </div>
       </div>
 

@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Menu, User, ShoppingCart } from "lucide-react";
 import { CartSheet } from "@/components/CartSheet";
 import { useCartItemCount } from "@/hooks/use-shopify-cart";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 export const Header = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const cartItemCount = useCartItemCount();
@@ -85,7 +86,7 @@ export const Header = () => {
             className="text-2xl font-bold tracking-tight cursor-pointer"
             onClick={() => navigate("/")}
           >
-            Rebuild Together
+            Rebuild Tuskegee
           </h2>
         </div>
         
@@ -105,48 +106,45 @@ export const Header = () => {
               )}
             </Button>
 
-          {user ? (
-            <>
-              <Button 
-                variant="ghost" 
-                className="hidden md:inline-flex"
-                onClick={() => navigate("/donor-dashboard")}
-              >
-                <User className="mr-2 h-4 w-4" />
-                Donor Dashboard
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="hidden md:inline-flex"
-                onClick={handleAdminClick}
-              >
-                Admin
-              </Button>
-              <Button onClick={() => navigate("/projects/maple-street-housing")}>
-                Donate Now
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button 
-                variant="ghost" 
-                className="hidden md:inline-flex"
-                onClick={handleAdminClick}
-              >
-                Admin
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="hidden md:inline-flex"
-                onClick={() => navigate("/auth")}
-              >
-                Sign In
-              </Button>
-              <Button onClick={() => navigate("/projects/maple-street-housing")}>
-                Donate Now
-              </Button>
-            </>
+          <Button 
+            variant="ghost" 
+            className="hidden md:inline-flex"
+            onClick={handleAdminClick}
+          >
+            Admin
+          </Button>
+          {user && (
+            <Button 
+              variant="ghost" 
+              className="hidden md:inline-flex"
+              onClick={() => navigate("/donor-dashboard")}
+            >
+              <User className="mr-2 h-4 w-4" />
+              Donor Dashboard
+            </Button>
           )}
+          {!user && (
+            <Button 
+              variant="ghost" 
+              className="hidden md:inline-flex"
+              onClick={() => navigate("/auth")}
+            >
+              Sign In
+            </Button>
+          )}
+          <Button 
+            variant="ghost" 
+            className="hidden md:inline-flex"
+            onClick={() => navigate("/contact")}
+          >
+            Contact Us
+          </Button>
+          <Button 
+            onClick={() => navigate("/projects/maple-street-housing")}
+            className="rounded-full bg-[rgb(6,78,59)] text-white hover:bg-[rgb(16,87,70)] px-5"
+          >
+            Donate Now
+          </Button>
           <Button variant="ghost" size="icon" className="md:hidden">
             <Menu className="h-5 w-5" />
           </Button>

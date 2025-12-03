@@ -44,15 +44,16 @@ const Auth = () => {
       if (error) throw error;
 
       toast({
-        title: "Welcome to Rebuild Together!",
+        title: "Welcome to Rebuild Tuskegee!",
         description: "Your account has been created successfully.",
       });
 
       navigate("/donor-dashboard");
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to sign up";
       toast({
         title: "Sign up failed",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -97,10 +98,11 @@ const Auth = () => {
       } else {
       navigate("/donor-dashboard");
       }
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to sign in";
       toast({
         title: "Sign in failed",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     } finally {

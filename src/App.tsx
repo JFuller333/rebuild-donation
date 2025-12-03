@@ -16,6 +16,7 @@ import CheckMyDonations from "./pages/CheckMyDonations";
 import ManualOrderProcess from "./pages/ManualOrderProcess";
 import CreateMyDonation from "./pages/CreateMyDonation";
 import NotFound from "./pages/NotFound";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/check-my-donations" element={<CheckMyDonations />} />
           <Route path="/manual-order-process" element={<ManualOrderProcess />} />
           <Route path="/create-my-donation" element={<CreateMyDonation />} />
+          <Route path="/contact" element={<Contact />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -38,7 +38,9 @@ export const ProjectCard = ({ id, title, location, description, image, raised, g
       </CardHeader>
       
       <CardContent className="space-y-4 flex-grow">
-        <p className="text-muted-foreground leading-relaxed">{description}</p>
+        <p className="text-muted-foreground leading-relaxed">
+          {description.length > 160 ? `${description.slice(0, 157)}...` : description}
+        </p>
         
         <div className="space-y-2">
           <div className="flex items-baseline justify-between text-sm">

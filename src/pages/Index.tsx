@@ -67,11 +67,17 @@ const Index = () => {
       });
 
       const stats = projectStats[product.handle];
+      const fallbackLocation =
+        stats?.location ||
+        (product.handle === "maple-street-housing" || product.vendor === "rebuild-investor-software"
+          ? "Greenwood Neighborhood"
+          : base.location);
 
       return {
         ...base,
         raised: stats?.raised ?? base.raised,
         goal: stats?.goal ?? base.goal,
+        location: fallbackLocation,
       };
     }) || [];
 
