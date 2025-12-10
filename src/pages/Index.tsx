@@ -154,30 +154,31 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
-              <h3 className="text-xl font-bold mb-4">Rebuild Together</h3>
+              <h3 className="text-xl font-bold mb-4">Rebuild Tuskegee</h3>
               <p className="text-sm text-white/80 leading-relaxed">
-                Empowering communities through transparent, impactful neighborhood development projects.
+                Empowering communities through transparent, impactful community development projects.
               </p>
             </div>
             <div>
               <h4 className="font-semibold mb-3">Quick Links</h4>
               <ul className="space-y-2 text-sm text-white/80">
-                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
+                <li><a href="https://www.letsrebuildtuskegee.org/" className="hover:text-white transition-colors">About Us</a></li>
                 <li><a href="#projects" className="hover:text-white transition-colors">Our Projects</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Get Involved</a></li>
+                <li><a href="https://www.letsrebuildtuskegee.org/" className="hover:text-white transition-colors">Get Involved</a></li>
+                <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-3">Contact</h4>
               <ul className="space-y-2 text-sm text-white/80">
-                <li>hello@rebuilttogether.org</li>
-                <li>(555) 123-4567</li>
+                <li>build@letsrebuildtuskegee.org</li>
+                <li></li>
                 <li>Tax ID: 12-3456789</li>
               </ul>
             </div>
           </div>
           <div className="pt-8 border-t border-white/10 text-center text-sm text-white/80">
-            <p>© 2024 Rebuild Together. 501(c)(3) nonprofit organization. All donations are tax-deductible.</p>
+            <p>© 2026 Let's Rebuild Together. 501(c)(3) nonprofit organization. All donations are tax-deductible.</p>
           </div>
         </div>
       </footer>
