@@ -1065,7 +1065,7 @@ const ProjectDetail = () => {
             <div>
               <h4 className="font-semibold mb-3">Contact</h4>
               <ul className="space-y-2 text-sm text-white/80">
-                <li>hello@rebuilttogether.org</li>
+                <li>build@letsrebuildtuskegee.org</li>
                 <li>(555) 123-4567</li>
                 <li>Tax ID: 12-3456789</li>
               </ul>
