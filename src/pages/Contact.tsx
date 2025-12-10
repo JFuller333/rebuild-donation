@@ -28,19 +28,7 @@ const Contact = () => {
             <CardContent className="space-y-4 text-muted-foreground">
               <div>
                 <p className="font-semibold text-foreground">Email</p>
-                <p>buid@letsrebuildtuskegee.org</p>
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">Phone</p>
-                <p>(555) 123-4567</p>
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">Mailing Address</p>
-                <p>
-                  123 Community Way
-                  <br />
-                  Tuskegee, AL 36083
-                </p>
+                <p>build@letsrebuildtuskegee.org</p>
               </div>
               <div>
                 <p className="font-semibold text-foreground">Office Hours</p>
@@ -58,7 +46,7 @@ const Contact = () => {
                 className="space-y-4"
                 onSubmit={(event) => {
                   event.preventDefault();
-                  window.location.href = "mailto:buid@letsrebuildtuskegee.org";
+                  window.location.href = "mailto:build@letsrebuildtuskegee.org";
                 }}
               >
                 <div className="space-y-2">
