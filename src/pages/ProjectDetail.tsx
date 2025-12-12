@@ -638,7 +638,8 @@ const ProjectDetail = () => {
 
         <div className="space-y-2.5">
           <Label className="text-base font-semibold">Choose an amount</Label>
-          <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="w-full overflow-x-auto pb-1">
+          <div className="flex w-max gap-2 snap-x snap-mandatory">
             {projectData.donationTiers
               .filter((tier) => tier.amount > 0.01)
               .map((tier) => (
@@ -648,7 +649,7 @@ const ProjectDetail = () => {
                     setSelectedTier(tier.amount);
                     setDonationAmount("");
                   }}
-                  className={`px-3 py-2 rounded-2xl border transition-all text-left min-w-[95px] ${
+                  className={`px-3 py-2 rounded-2xl border transition-all text-left min-w-[100px] snap-start flex-shrink-0 ${
                     selectedTier === tier.amount
                       ? "border-primary bg-primary/5 shadow-inner"
                       : "border-border hover:border-primary/40"
@@ -658,6 +659,7 @@ const ProjectDetail = () => {
                   <div className="text-[10px] text-muted-foreground mt-0.5">{tier.label}</div>
                 </button>
               ))}
+          </div>
           </div>
         </div>
 
@@ -742,7 +744,7 @@ const ProjectDetail = () => {
   );
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <Header />
       
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 pb-24 lg:pb-12">
@@ -979,11 +981,11 @@ const ProjectDetail = () => {
                     {projectData.progressGallery.map((item, index) => (
                       <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/2">
                         <div className="relative group">
-                          <div className="aspect-[4/3] overflow-hidden rounded-lg">
+                          <div className="aspect-[4/3] overflow-hidden rounded-lg bg-black">
                             <img
                               src={item.image}
                               alt={item.caption}
-                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
                             />
                           </div>
                           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 rounded-b-lg">

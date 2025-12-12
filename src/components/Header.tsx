@@ -83,7 +83,7 @@ export const Header = () => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-8 text-white">
           <h2 
-            className="text-2xl font-bold tracking-tight cursor-pointer"
+            className="text-[1.35em] md:text-[1.6em] font-bold tracking-tight cursor-pointer"
             onClick={() => navigate("/")}
           >
             Rebuild Tuskegee
@@ -140,7 +140,7 @@ export const Header = () => {
             Contact Us
           </Button>
           <Button 
-            onClick={() => navigate("/projects/maple-street-housing")}
+            onClick={() => navigate("/projects/investment-tier-1")}
             className="rounded-full bg-[rgb(6,78,59)] text-white hover:bg-[rgb(16,87,70)] px-5"
           >
             Donate Now
