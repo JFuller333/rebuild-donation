@@ -737,7 +737,7 @@ const ProjectDetail = () => {
 
         <p className="text-xs text-center text-muted-foreground pt-2 border-t">
           Your donation is tax-deductible. <br />
-          Tax ID: 12-3456789
+          Tax ID: 83-3300246
         </p>
       </CardContent>
     </Card>
@@ -1066,7 +1066,7 @@ const ProjectDetail = () => {
               <ul className="space-y-2 text-sm text-white/80">
                 <li>build@letsrebuildtuskegee.org</li>
                 <li></li>
-                <li>Tax ID: 12-3456789</li>
+                <li>Tax ID: 83-3300246</li>
               </ul>
             </div>
           </div>

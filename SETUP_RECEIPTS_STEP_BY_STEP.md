@@ -193,7 +193,7 @@ Research Deno-compatible PDF libraries and update the generator function.
 Edit `supabase/functions/generate-receipt/index.ts`:
 
 1. Update organization name
-2. Update tax ID (currently: `12-3456789`)
+2. Update tax ID (currently: `83-3300246`)
 3. Add logo (if you have one)
 4. Customize styling
 5. Add any additional information

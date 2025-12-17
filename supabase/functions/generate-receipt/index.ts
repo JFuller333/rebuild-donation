@@ -39,7 +39,7 @@ async function generateReceiptPDF(data: ReceiptRequest): Promise<Uint8Array> {
   let yPosition = height - 50;
 
   // Header
-  page.drawText("Rebuild Tuskegee", {
+  page.drawText("Let's Rebuild Tuskegee", {
     x: 50,
     y: yPosition,
     size: 24,
@@ -198,7 +198,7 @@ async function generateReceiptPDF(data: ReceiptRequest): Promise<Uint8Array> {
   yPosition -= 80;
 
   // Footer
-  page.drawText("Tax ID: 12-3456789", {
+  page.drawText("Tax ID: 83-3300246", {
     x: 50,
     y: yPosition,
     size: 12,
@@ -207,7 +207,7 @@ async function generateReceiptPDF(data: ReceiptRequest): Promise<Uint8Array> {
   });
 
   yPosition -= 30;
-  const disclaimer = "This is an official receipt for your tax-deductible donation to Rebuild Tuskegee, a 501(c)(3) nonprofit organization. No goods or services were provided in exchange for this contribution. Please retain this receipt for your tax records.";
+  const disclaimer = "This is an official receipt for your tax-deductible donation to Let's Rebuild Tuskegee, a 501(c)(3) nonprofit organization. No goods or services were provided in exchange for this contribution. Please retain this receipt for your tax records.";
   
   // Split long text into multiple lines
   const words = disclaimer.split(" ");
@@ -244,7 +244,7 @@ async function generateReceiptPDF(data: ReceiptRequest): Promise<Uint8Array> {
   }
 
   lineY -= 20;
-  page.drawText("For questions, contact: hello@rebuilttogether.org", {
+  page.drawText("For questions, contact: build@letsrebuildtuskegee.org", {
     x: 50,
     y: lineY,
     size: 9,

@@ -173,7 +173,7 @@ const Index = () => {
               <ul className="space-y-2 text-sm text-white/80">
                 <li>build@letsrebuildtuskegee.org</li>
                 <li></li>
-                <li>Tax ID: 12-3456789</li>
+                <li>Tax ID: 83-3300246</li>
               </ul>
             </div>
           </div>

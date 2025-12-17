@@ -186,7 +186,7 @@ After deploying `shopify-webhook` function:
 ## What's Next After Setup?
 
 1. Customize receipt template (edit `generate-receipt/index.ts`)
-2. Update tax ID in receipt (currently: `12-3456789`)
+2. Update tax ID in receipt (currently: `83-3300246`)
 3. Add your logo (if you want)
 4. Test with real donations
 5. Monitor Edge Function logs for any issues

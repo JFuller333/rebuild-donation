@@ -101,7 +101,7 @@ Clicks to download PDF
 
 The receipt includes:
 - Organization name: "Rebuild Tuskegee"
-- Tax ID: 12-3456789 (update this!)
+- Tax ID: 83-3300246 (update this!)
 - Receipt number
 - Donation date
 - Donor information

@@ -107,9 +107,9 @@ async function generateAnnualPDF({
     y -= opts.yOffset ?? 20;
   };
 
-  drawText("Rebuild Tuskegee", { size: 24, font: bold, yOffset: 30 });
+  drawText("Let's Rebuild Tuskegee", { size: 24, font: bold, yOffset: 30 });
   drawText("Annual Donation Summary", { size: 16, font: bold, yOffset: 24 });
-  drawText(`Tax ID: 12-3456789`, { size: 12 });
+  drawText(`Tax ID: 83-3300246`, { size: 12 });
   drawText(`Year: ${year}`, { size: 12 });
 
   y -= 10;
