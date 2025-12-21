@@ -819,10 +819,24 @@ const AdminDashboard = () => {
       <div className="page-shell py-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-          {/* <Button onClick={() => setShowCreateForm(true)}>
+          <Button
+            onClick={() => {
+              setEditingProject(null);
+              setFormData({
+                title: "",
+                description: "",
+                location: "",
+                goal_amount: "",
+                image_url: "",
+                days_left: "",
+                shopify_product_handle: "",
+              });
+              setShowCreateForm(true);
+            }}
+          >
             <Plus className="mr-2 h-4 w-4" />
             New Project
-          </Button> */}
+          </Button>
         </div>
 
         {/* Stats */}
@@ -859,7 +873,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Create/Edit Form */}
-        {/* {showCreateForm && (
+        {showCreateForm && (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle>{editingProject ? "Edit Project" : "Create New Project"}</CardTitle>
@@ -991,7 +1005,7 @@ const AdminDashboard = () => {
               </form>
             </CardContent>
           </Card>
-        )} */}
+        )}
 
         {/* Project Updates Section */}
         <div className="mb-8">

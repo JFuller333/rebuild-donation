@@ -1,8 +1,8 @@
 const stats = [
-  { value: "127", label: "Projects Completed" },
-  { value: "$2.4M", label: "Community Investment" },
-  { value: "1,850", label: "Families Helped" },
-  { value: "23", label: "Neighborhoods Transformed" },
+  { value: "17+", label: "Projects" },
+  { value: "$2.4M", label: "Projected Community Investment" },
+  { value: "1,850", label: "Jobs Created" },
+  { value: "7+", label: "Neighborhoods Transformed" },
 ];
 
 export const Stats = () => {
