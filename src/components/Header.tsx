@@ -91,7 +91,7 @@ export const Header = () => {
             className="h-12 md:h-16 w-auto rounded"
           />
           <h2 
-            className="text-[1.35em] md:text-[1.6em] font-bold tracking-tight"
+            className="hidden md:block text-[1.35em] md:text-[1.6em] font-bold tracking-tight"
           >
             Let's Rebuild Tuskegee
           </h2>
