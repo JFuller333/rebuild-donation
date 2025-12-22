@@ -1,8 +1,19 @@
+import { type MouseEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import heroImage from "@/assets/hero-community.jpg";
 
 export const Hero = () => {
+  const handleFundClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    const section = document.getElementById("projects");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    } else {
+      window.location.href = "/#projects";
+    }
+  };
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-primary/5 to-accent/10">
       <div className="absolute inset-0 z-0">
@@ -27,12 +38,30 @@ export const Hero = () => {
             neighborhoods through transparent, impactful development projects.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button size="lg" className="text-base group shadow-lg shadow-primary/20">
-              Fund a Project Today
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            <Button size="lg" className="text-base group shadow-lg shadow-primary/20" asChild>
+              <a
+                href="#projects"
+                onClick={handleFundClick}
+                className="inline-flex items-center"
+              >
+                Fund a Project Today
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </a>
             </Button>
-            <Button size="lg" variant="ghost" className="text-base bg-white/80 hover:bg-white shadow">
-              See Our Impact
+            <Button
+              size="lg"
+              variant="ghost"
+              className="text-base bg-white/80 hover:bg-white shadow"
+              asChild
+            >
+              <a
+                href="https://www.letsrebuildtuskegee.org/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center"
+              >
+                See Our Impact
+              </a>
             </Button>
           </div>
         </div>

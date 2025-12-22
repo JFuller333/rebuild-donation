@@ -1047,7 +1047,7 @@ const ProjectDetail = () => {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
-              <h3 className="text-xl font-bold mb-4">Rebuild Tuskegee</h3>
+              <h3 className="text-xl font-bold mb-4">Let's Rebuild Tuskegee</h3>
               <p className="text-sm text-white/80 leading-relaxed">
                 Empowering communities through transparent, impactful community development projects.
               </p>
@@ -1071,7 +1071,7 @@ const ProjectDetail = () => {
             </div>
           </div>
           <div className="pt-8 border-t border-white/10 text-center text-sm text-white/80">
-            <p>© 2026 Let's Rebuild Together. 501(c)(3) nonprofit organization. All donations are tax-deductible.</p>
+            <p>© 2026 Let's Rebuild Tuskegee. 501(c)(3) nonprofit organization. All donations are tax-deductible.</p>
           </div>
         </div>
       </footer>

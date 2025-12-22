@@ -81,12 +81,19 @@ export const Header = () => {
     <>
     <header className="sticky top-0 z-50 w-full border-b border-border bg-black/95 text-white">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <div className="flex items-center gap-8 text-white">
+        <div 
+          className="flex items-center gap-3 text-white cursor-pointer"
+          onClick={() => navigate("/")}
+        >
+          <img 
+            src="/lrt-logo.png" 
+            alt="Let's Rebuild Tuskegee logo" 
+            className="h-12 md:h-16 w-auto rounded"
+          />
           <h2 
-            className="text-[1.35em] md:text-[1.6em] font-bold tracking-tight cursor-pointer"
-            onClick={() => navigate("/")}
+            className="text-[1.35em] md:text-[1.6em] font-bold tracking-tight"
           >
-            Rebuild Tuskegee
+            Let's Rebuild Tuskegee
           </h2>
         </div>
         
