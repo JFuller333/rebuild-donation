@@ -166,6 +166,7 @@ const Index = () => {
                 <li><a href="#projects" className="hover:text-white transition-colors">Our Projects</a></li>
                 <li><a href="https://www.letsrebuildtuskegee.org/" className="hover:text-white transition-colors">Get Involved</a></li>
                 <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
+                <li>Tax ID: 83-3300246</li>
               </ul>
             </div>
             <div>
@@ -173,7 +174,6 @@ const Index = () => {
               <ul className="space-y-2 text-sm text-white/80">
                 <li>build@letsrebuildtuskegee.org</li>
                 <li></li>
-                <li>Tax ID: 83-3300246</li>
               </ul>
             </div>
           </div>

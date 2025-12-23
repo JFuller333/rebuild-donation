@@ -188,7 +188,7 @@ const DonorDashboard = () => {
         <Tabs defaultValue="donations" className="w-full">
           <TabsList>
             <TabsTrigger value="donations">Donation History</TabsTrigger>
-            <TabsTrigger value="receipts">Tax Receipts</TabsTrigger>
+            {/* <TabsTrigger value="receipts">Tax Receipts</TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="donations" className="mt-6 space-y-4">
@@ -296,8 +296,8 @@ const DonorDashboard = () => {
               ))
             )}
           </TabsContent>
-
-          <TabsContent value="receipts" className="mt-6 space-y-4">
+          
+          {/* <TabsContent value="receipts" className="mt-6 space-y-4">
             {taxReceipts.length === 0 ? (
               <Card>
                 <CardContent className="py-16 text-center">
@@ -336,7 +336,7 @@ const DonorDashboard = () => {
                 </Card>
               ))
             )}
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </div>
     </div>
