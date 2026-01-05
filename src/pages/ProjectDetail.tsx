@@ -6,6 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Carousel,
   CarouselContent,
@@ -58,6 +68,9 @@ const ProjectDetail = () => {
   const { toast } = useToast();
   const [donationAmount, setDonationAmount] = useState("");
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
+  const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [refundPreference, setRefundPreference] = useState<"refund" | "reallocate" | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Initial render log
   console.log("🔵 ProjectDetail component rendered", { productHandle });
@@ -334,8 +347,31 @@ const ProjectDetail = () => {
     [projectData?.story]
   );
 
+  const handleConfirmRefundPreference = () => {
+    if (!refundPreference) {
+      toast({
+        title: "Choose a refund option",
+        description: "Select refund or reallocation before continuing.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setTermsAccepted(true);
+    setRefundModalOpen(false);
+  };
+
   const handleAddToCart = () => {
     if (!product) return;
+
+    if (!termsAccepted || !refundPreference) {
+      toast({
+        title: "Review terms first",
+        description: "Please read the terms and choose your refund option.",
+        variant: "destructive",
+      });
+      setRefundModalOpen(true);
+      return;
+    }
 
     let variant: ProductVariant | null = null;
     let quantity = 1;
@@ -473,6 +509,14 @@ const ProjectDetail = () => {
         value: 'true',
       });
     }
+    attributes.push({
+      key: "_refund_preference",
+      value: refundPreference!,
+    });
+    attributes.push({
+      key: "_terms_acknowledged_at",
+      value: new Date().toISOString(),
+    });
     
     const cartInput = {
       merchandiseId: variant.id,
@@ -685,6 +729,125 @@ const ProjectDetail = () => {
             />
           </div>
         </div>
+
+        <div className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-4 space-y-2">
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="refund-ack"
+              checked={termsAccepted}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  setRefundModalOpen(true);
+                } else {
+                  setTermsAccepted(false);
+                  setRefundPreference(null);
+                }
+              }}
+              className="mt-1"
+            />
+            <div className="space-y-2 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="refund-ack" className="font-semibold text-sm">
+                  Refund preference & terms
+                </Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-primary"
+                  onClick={() => setRefundModalOpen(true)}
+                >
+                  Review
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Please review our terms and choose how we should handle your donation if a project is postponed.
+              </p>
+              {termsAccepted && refundPreference && (
+                <div className="text-xs font-semibold text-foreground">
+                  Selected:{" "}
+                  {refundPreference === "refund"
+                    ? "Full refund to the original payment method"
+                    : "Reallocate my donation to another active project"}
+                </div>
+              )}
+              {!termsAccepted && (
+                <div className="text-[11px] text-destructive">
+                  Required before donating.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <Dialog
+          open={refundModalOpen}
+          onOpenChange={(open) => {
+            setRefundModalOpen(open);
+            if (!open && !termsAccepted) {
+              setTermsAccepted(false);
+              setRefundPreference(null);
+            }
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Terms & refund preference</DialogTitle>
+              <DialogDescription>
+                Please confirm how we should handle your donation if a project is postponed.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>
+                Your donation supports community projects. In the rare case a project is postponed, choose how you would like us to proceed.
+              </p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>You will be notified of any schedule changes.</li>
+                <li>Refunds return to the original payment method.</li>
+                <li>Reallocations move your donation to another active project.</li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">Select your preference</Label>
+              <RadioGroup
+                value={refundPreference ?? ""}
+                onValueChange={(value) => setRefundPreference(value as "refund" | "reallocate")}
+                className="gap-3"
+              >
+                <div className="flex items-start gap-3 rounded-lg border border-border/70 p-3">
+                  <RadioGroupItem value="refund" id="refund-option" className="mt-1" />
+                  <div className="space-y-1">
+                    <Label htmlFor="refund-option" className="text-sm font-semibold">
+                      Full refund
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      If postponed, return my donation to the original payment method.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-lg border border-border/70 p-3">
+                  <RadioGroupItem value="reallocate" id="reallocate-option" className="mt-1" />
+                  <div className="space-y-1">
+                    <Label htmlFor="reallocate-option" className="text-sm font-semibold">
+                      Reallocate to another project
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Move my donation to another active project if this one is postponed.
+                    </p>
+                  </div>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button variant="outline" onClick={() => setRefundModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleConfirmRefundPreference}>Save preference</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <div className="space-y-3">
           <Button
