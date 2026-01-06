@@ -1063,8 +1063,9 @@ const ProjectDetail = () => {
                                   </span>
                                 )}
                                 {update.status === 'in-progress' && (
-                                  <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-[#facc15] text-[#854d0e] shadow-sm">
-                                    ⏳ IN PROGRESS
+                                  <span className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full bg-[#facc15] text-[#854d0e] shadow-sm">
+                                    <Clock className="h-3.5 w-3.5" />
+                                    IN PROGRESS
                                   </span>
                                 )}
                               </div>
