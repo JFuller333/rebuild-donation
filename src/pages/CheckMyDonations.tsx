@@ -103,6 +103,7 @@ const CheckMyDonations = () => {
             <p className="text-muted-foreground">
               Verify if your donations are linked to your account
             </p>
+            <p className="text-xs text-muted-foreground">Last updated Jan 5, 2026</p>
           </div>
           <div className="flex gap-2">
             <Button onClick={checkData} variant="outline">

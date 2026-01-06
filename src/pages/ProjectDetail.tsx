@@ -901,6 +901,9 @@ const ProjectDetail = () => {
         <p className="text-xs text-center text-muted-foreground pt-2 border-t">
           Your donation is tax-deductible. <br />
           Tax ID: 83-3300246
+          <span className="block text-[11px] text-muted-foreground/80 mt-1">
+            Last updated Jan 5, 2026
+          </span>
         </p>
       </CardContent>
     </Card>
