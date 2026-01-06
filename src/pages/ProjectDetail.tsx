@@ -285,9 +285,9 @@ const ProjectDetail = () => {
   const sortedUpdates = [...updates].sort((a, b) => {
     const statusPriority: Record<string, number> = {
       "completed": 0,
-      "in-progress": 1,
-      "upcoming": 2,
-      "other": 3,
+      "upcoming": 1,
+      "other": 1,
+      "in-progress": 2, // show in-progress items last
     };
 
     const statusDiff = (statusPriority[normalizeStatus(a.status)] ?? 3) - (statusPriority[normalizeStatus(b.status)] ?? 3);
@@ -295,7 +295,7 @@ const ProjectDetail = () => {
 
     const dateA = new Date(a.updated_at || a.date).getTime();
     const dateB = new Date(b.updated_at || b.date).getTime();
-    return dateB - dateA;
+    return dateA - dateB; // oldest to newest within each status group
   });
 
   const projectData = product ? {
