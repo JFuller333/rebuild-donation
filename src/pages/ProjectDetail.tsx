@@ -71,6 +71,7 @@ const ProjectDetail = () => {
   const [refundModalOpen, setRefundModalOpen] = useState(false);
   const [refundPreference, setRefundPreference] = useState<"refund" | "reallocate" | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   // Initial render log
   console.log("🔵 ProjectDetail component rendered", { productHandle });
@@ -91,6 +92,15 @@ const ProjectDetail = () => {
       productError: productError?.message
     });
   }, [productHandle, productData, product, productLoading, productError]);
+
+  // Fetch current user for recording refund preferences
+  useEffect(() => {
+    const loadUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setCurrentUser(data.user);
+    };
+    loadUser();
+  }, []);
   
   // Fetch project metrics
   const [projectRecord, setProjectRecord] = useState<{
@@ -347,7 +357,7 @@ const ProjectDetail = () => {
     [projectData?.story]
   );
 
-  const handleConfirmRefundPreference = () => {
+  const handleConfirmRefundPreference = async () => {
     if (!refundPreference) {
       toast({
         title: "Choose a refund option",
@@ -356,6 +366,27 @@ const ProjectDetail = () => {
       });
       return;
     }
+
+    // Persist preference to Supabase (best-effort)
+    try {
+      await supabase
+        .from("refund_preferences")
+        .upsert({
+          user_id: currentUser?.id ?? null,
+          email: currentUser?.email ?? null,
+          shopify_product_handle: productHandle,
+          preference: refundPreference,
+          acknowledged_at: new Date().toISOString(),
+        });
+    } catch (err) {
+      console.error("Failed to save refund preference", err);
+      toast({
+        title: "Could not save preference",
+        description: "We’ll still proceed, but your choice may not be recorded.",
+        variant: "destructive",
+      });
+    }
+
     setTermsAccepted(true);
     setRefundModalOpen(false);
   };
