@@ -1,1 +1,5 @@
 project_id = "tjoieuiijrtdwdmjkcdo"
+
+[functions.shopify-webhook]
+# Shopify cannot send our Supabase auth header, so disable JWT verification
+verify_jwt = false

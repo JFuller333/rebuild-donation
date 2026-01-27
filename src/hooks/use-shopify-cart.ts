@@ -54,7 +54,7 @@ export function useAddToCart() {
         return result.cart;
       };
 
-      let cartId = CartStorage.getCartId();
+      const cartId = CartStorage.getCartId();
 
       // If no cart exists, create one
       if (!cartId) {

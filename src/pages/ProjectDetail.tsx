@@ -176,17 +176,17 @@ const ProjectDetail = () => {
   useEffect(() => {
     if (!productHandle) return;
 
+    let isMounted = true;
+
     const fetchDonors = async () => {
+      if (!isMounted) return;
       setDonorsLoading(true);
-      const { data, error } = await supabase
-        .from("donations")
-        .select(`
-          *,
-          profiles (full_name, email)
-        `)
-        .eq("shopify_product_handle", productHandle)
-        .order("created_at", { ascending: false })
-        .limit(10);
+      const { data, error } = await supabase.rpc("get_recent_donors", {
+        product_handle: productHandle,
+        limit_rows: 10,
+      });
+
+      if (!isMounted) return;
 
       if (error) {
         console.error("Error fetching donors:", error);
@@ -194,7 +194,7 @@ const ProjectDetail = () => {
         const formattedDonors: RecentDonor[] = (data || []).map((donation: any) => {
           const timeAgo = getTimeAgo(new Date(donation.created_at));
           return {
-            name: donation.profiles?.full_name || donation.profiles?.email?.split('@')[0] || "Anonymous",
+            name: donation.name || "Anonymous",
             amount: parseFloat(donation.amount),
             time: timeAgo,
           };
@@ -205,6 +205,12 @@ const ProjectDetail = () => {
     };
 
     fetchDonors();
+    const intervalId = setInterval(fetchDonors, 10000); // refresh every 10s
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, [productHandle]);
 
   // Fetch dynamic features from Supabase
@@ -355,6 +361,17 @@ const ProjectDetail = () => {
   const sanitizedStory = useMemo(
     () => (projectData?.story ? DOMPurify.sanitize(projectData.story) : ""),
     [projectData?.story]
+  );
+
+  // Display current date for "Last updated" footer text
+  const lastUpdatedLabel = useMemo(
+    () =>
+      new Date().toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+    []
   );
 
   const handleConfirmRefundPreference = async () => {
@@ -933,7 +950,7 @@ const ProjectDetail = () => {
           Your donation is tax-deductible. <br />
           Tax ID: 83-3300246
           <span className="block text-[11px] text-muted-foreground/80 mt-1">
-            Last updated Jan 5, 2026
+            Last updated {lastUpdatedLabel}
           </span>
         </p>
       </CardContent>
@@ -1118,24 +1135,35 @@ const ProjectDetail = () => {
               </TabsContent>
               
               <TabsContent value="donors" className="space-y-3 mt-6">
-                {projectData.recentDonors.map((donor, index) => (
-                  <Card key={index} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                    <CardContent className="flex items-center justify-between py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Heart className="h-5 w-5 text-primary" />
+                {donorsLoading ? (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Loading donors...</span>
+                  </div>
+                ) : projectData.recentDonors.length === 0 ? (
+                  <p className="text-muted-foreground text-sm">
+                    No donors yet. Be the first to support this project!
+                  </p>
+                ) : (
+                  projectData.recentDonors.map((donor, index) => (
+                    <Card key={index} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
+                      <CardContent className="flex items-center justify-between py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Heart className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-semibold">{donor.name}</p>
+                            <p className="text-sm text-muted-foreground">{donor.time}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold">{donor.name}</p>
-                          <p className="text-sm text-muted-foreground">{donor.time}</p>
-                        </div>
-                      </div>
-                      <span className="text-lg font-bold text-primary">
-                        ${donor.amount.toLocaleString()}
-                      </span>
-                    </CardContent>
-                  </Card>
-                ))}
+                        <span className="text-lg font-bold text-primary">
+                          ${donor.amount.toLocaleString()}
+                        </span>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </TabsContent>
             </Tabs>
 
