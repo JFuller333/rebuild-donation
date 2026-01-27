@@ -173,8 +173,10 @@ const ProjectDetail = () => {
   }, [productHandle]);
 
   // Fetch recent donors from Supabase
+  const [activeTab, setActiveTab] = useState("story");
+
   useEffect(() => {
-    if (!productHandle) return;
+    if (!productHandle || activeTab !== "donors") return;
 
     let isMounted = true;
 
@@ -199,19 +201,29 @@ const ProjectDetail = () => {
             time: timeAgo,
           };
         });
-        setRecentDonors(formattedDonors);
+
+        setRecentDonors((prev) => {
+          const isSame =
+            prev.length === formattedDonors.length &&
+            prev.every((d, i) =>
+              d.name === formattedDonors[i].name &&
+              d.amount === formattedDonors[i].amount &&
+              d.time === formattedDonors[i].time
+            );
+          return isSame ? prev : formattedDonors;
+        });
       }
       setDonorsLoading(false);
     };
 
     fetchDonors();
-    const intervalId = setInterval(fetchDonors, 10000); // refresh every 10s
+    const intervalId = setInterval(fetchDonors, 15000); // refresh every 15s while on donors tab
 
     return () => {
       isMounted = false;
       clearInterval(intervalId);
     };
-  }, [productHandle]);
+  }, [productHandle, activeTab]);
 
   // Fetch dynamic features from Supabase
   useEffect(() => {
@@ -1012,7 +1024,7 @@ const ProjectDetail = () => {
                 )}
 
             {/* Tabs Content */}
-            <Tabs defaultValue="story" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="flex w-full flex-wrap gap-2 rounded-[999px] bg-[rgb(10,47,39)]/90 p-1 text-sm text-white md:grid md:grid-cols-3 md:gap-0 shadow-[0_12px_35px_rgba(10,47,39,0.35)]">
                 <TabsTrigger
                   value="story"
