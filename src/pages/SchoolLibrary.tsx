@@ -50,7 +50,7 @@ const SchoolLibrary = () => {
             School library
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Podcast episodes organized by topic, pathway, and tags—plus Voices of Leadership from our board,
+            Podcast episodes organized by topic, pathway, and tags—plus Voices in Leadership from our board,
             so learners hear policy, finance, and mission from the people who govern the work.
           </p>
           <div className="flex flex-wrap gap-3">
@@ -74,7 +74,7 @@ const SchoolLibrary = () => {
             </TabsTrigger>
             <TabsTrigger value="leadership" className="gap-2">
               <Users className="h-4 w-4" aria-hidden />
-              Voices of Leadership
+              Voices in Leadership
             </TabsTrigger>
           </TabsList>
 
@@ -181,7 +181,7 @@ const SchoolLibrary = () => {
                         <CardDescription className="text-sm font-medium text-primary normal-case">
                           {voice.name.trim()
                             ? voice.boardRole
-                            : "Voices of Leadership · Board of directors"}
+                            : "Voices in Leadership · Board of directors"}
                         </CardDescription>
                       </div>
                     </div>

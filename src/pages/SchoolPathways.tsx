@@ -33,7 +33,7 @@ const futureNav = [
   { label: "Community Revitalization", note: "" },
   { label: "Voices in ownership", note: "Advisory layer across pathways" },
   { label: "Curriculum modules", note: "Per-pathway lessons (planned)" },
-  { label: "Library", note: "Podcast episodes + Voices of Leadership" },
+  { label: "Library", note: "Podcast episodes + Voices in Leadership" },
   { label: "Podcast Knowledge", note: "Browse by topic, pathway, tags" },
   { label: "Resources", note: "Templates and downloads" },
   { label: "Community", note: "Discussions and cohorts" },
