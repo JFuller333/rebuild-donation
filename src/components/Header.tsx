@@ -10,72 +10,20 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 export const Header = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const cartItemCount = useCartItemCount();
 
   useEffect(() => {
-    // Check current auth state
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
-      if (user) {
-        checkAdminRole(user.id);
-      }
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) {
-        checkAdminRole(session.user.id);
-      } else {
-        setIsAdmin(false);
-      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const checkAdminRole = async (userId: string) => {
-    try {
-      // Use maybeSingle() instead of single() to handle case where no role exists
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      // If table doesn't exist (406/404), just assume not admin
-      if (error && (error.code === 'PGRST116' || error.message?.includes('406') || error.message?.includes('relation') || error.message?.includes('does not exist'))) {
-        console.warn("user_roles table may not exist yet. Run migrations to create it.");
-        setIsAdmin(false);
-        return;
-      }
-
-      const hasAdminRole = !error && data !== null;
-      setIsAdmin(hasAdminRole);
-      
-      // Debug logging
-      console.log("Admin role check:", {
-        userId,
-        hasAdminRole,
-        error: error?.message,
-        data
-      });
-    } catch (error) {
-      console.error("Error checking admin role:", error);
-      setIsAdmin(false);
-    }
-  };
-
-  const handleAdminClick = () => {
-    if (!user || !isAdmin) {
-      navigate("/auth");
-      return;
-    }
-    navigate("/admin-dashboard");
-  };
 
   return (
     <>
@@ -116,9 +64,9 @@ export const Header = () => {
           <Button 
             variant="ghost" 
             className="hidden md:inline-flex"
-            onClick={handleAdminClick}
+            onClick={() => navigate("/projects/investment-tier-1")}
           >
-            Admin
+            Donate
           </Button>
           {user && (
             <Button 
