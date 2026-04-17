@@ -33,6 +33,14 @@ export function useProducts(options?: {
   });
 }
 
+/** Products tagged `apparel` in Shopify (Storefront `tag:apparel` + client tag check). */
+export function useApparelProducts(first = 250) {
+  return useProducts({
+    first,
+    query: "tag:apparel",
+  });
+}
+
 /**
  * Hook to get a collection by handle
  */

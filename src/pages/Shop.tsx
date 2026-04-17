@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Header } from "@/components/Header";
 import { ShopProductCard } from "@/components/ShopProductCard";
-import { useProducts } from "@/hooks/use-shopify-products";
+import { useApparelProducts } from "@/hooks/use-shopify-products";
 import {
   getProductImageUrl,
   getProductPriceFormatted,
@@ -10,6 +10,8 @@ import {
 import type { ShopifyProduct } from "@/integrations/shopify/types";
 import { Loader2 } from "lucide-react";
 
+const APPAREL_TAG = "apparel";
+
 function stripDescription(product: ShopifyProduct): string {
   const raw = product.description?.trim() || "";
   if (raw) return raw;
@@ -17,16 +19,22 @@ function stripDescription(product: ShopifyProduct): string {
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+function productHasApparelTag(product: ShopifyProduct): boolean {
+  return (product.tags || []).some((t) => t.toLowerCase() === APPAREL_TAG);
+}
+
 function productCategoryLabel(product: ShopifyProduct): string {
-  return (product.productType || product.vendor || "Shop").trim() || "Shop";
+  return (product.productType || product.vendor || "Apparel").trim() || "Apparel";
 }
 
 const Shop = () => {
-  const { data, isLoading, error } = useProducts({ first: 250 });
+  const { data, isLoading, error } = useApparelProducts(250);
 
   const products = useMemo(() => {
     if (!data?.edges?.length) return [];
-    return data.edges.map(({ node }) => node);
+    return data.edges
+      .map(({ node }) => node)
+      .filter((node) => productHasApparelTag(node));
   }, [data]);
 
   return (
@@ -36,9 +44,10 @@ const Shop = () => {
       <section className="border-b border-border bg-secondary/20">
         <div className="container mx-auto px-4 py-12 md:py-16">
           <p className="text-sm font-semibold uppercase tracking-widest text-primary mb-2">Shop</p>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">All products</h1>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">Apparel</h1>
           <p className="text-muted-foreground max-w-2xl text-lg">
-            Browse everything in the storefront. Tap a product for details and checkout.
+            Only products tagged <span className="font-medium text-foreground">{APPAREL_TAG}</span> in Shopify
+            appear here.
           </p>
         </div>
       </section>
@@ -58,7 +67,10 @@ const Shop = () => {
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-16 max-w-lg mx-auto">
-              <p className="text-muted-foreground">No products returned from Shopify yet.</p>
+              <p className="text-muted-foreground">
+                No products with the <code className="text-foreground">{APPAREL_TAG}</code> tag yet. Add that tag in
+                Shopify to list items on this page.
+              </p>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
