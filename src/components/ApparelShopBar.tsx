@@ -74,10 +74,7 @@ export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
                       to={item.to}
                       className={cn(
                         stepLinkClass,
-                        "-m-1 flex gap-3 p-1 pb-7 last:pb-1",
-                        isActive
-                          ? "bg-yellow-400/15 text-foreground"
-                          : "text-muted-foreground hover:text-foreground"
+                        "-m-1 flex gap-3 p-1 pb-7 last:pb-1 text-muted-foreground hover:text-foreground"
                       )}
                       aria-label={`Step ${item.step}: ${item.label}`}
                       aria-current={isActive ? "step" : undefined}
@@ -94,12 +91,7 @@ export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
                           />
                         ) : null}
                       </span>
-                      <span
-                        className={cn(
-                          "min-w-0 flex-1 pt-1.5 text-sm font-medium leading-snug group-hover:text-foreground",
-                          isActive && "font-semibold text-foreground"
-                        )}
-                      >
+                      <span className="min-w-0 flex-1 pt-1.5 text-sm font-medium leading-snug group-hover:text-foreground">
                         {item.label}
                       </span>
                     </Link>
@@ -119,10 +111,7 @@ export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
                         to={item.to}
                         className={cn(
                           stepLinkClass,
-                          "flex flex-col items-center gap-3 p-1",
-                          isActive
-                            ? "bg-yellow-400/15 text-foreground hover:text-foreground"
-                            : "text-muted-foreground hover:text-foreground"
+                          "flex flex-col items-center gap-3 p-1 text-muted-foreground hover:text-foreground"
                         )}
                         aria-label={`Step ${item.step}: ${item.label}`}
                         aria-current={isActive ? "step" : undefined}
@@ -147,12 +136,7 @@ export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
                             aria-hidden
                           />
                         </span>
-                        <span
-                          className={cn(
-                            "max-w-[14rem] px-1 text-center text-sm font-medium leading-snug group-hover:text-foreground",
-                            isActive && "font-semibold text-foreground"
-                          )}
-                        >
+                        <span className="max-w-[14rem] px-1 text-center text-sm font-medium leading-snug group-hover:text-foreground">
                           {item.label}
                         </span>
                       </Link>
