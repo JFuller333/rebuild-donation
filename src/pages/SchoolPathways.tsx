@@ -5,8 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import {
   BookOpen,
+  Brain,
+  Building2,
   Compass,
   GitBranch,
+  HardHat,
+  Landmark,
   Layers,
   Library,
   Link2,
@@ -80,6 +84,7 @@ const futureNav = [
   { label: "Family Equity", note: "" },
   { label: "New Ownership", note: "" },
   { label: "Community Revitalization", note: "" },
+  { label: "Voices in ownership", note: "Advisory layer across pathways" },
   { label: "Library", note: "Podcast knowledge + resources" },
   { label: "Podcast Knowledge", note: "Browse by topic, pathway, tags" },
   { label: "Resources", note: "Templates and downloads" },
@@ -98,10 +103,37 @@ const lessonBlueprint = [
 
 const podcastOrganization = ["Topic (e.g. heirs property, credit, development)", "Pathway (auto-linked)", "Tags"];
 
+const advisoryVoices = [
+  {
+    title: "Council member",
+    role: "Civic infrastructure advisor",
+    primaryPath: "Community Revitalization",
+    supports: ["Family Equity", "New Ownership"] as const,
+    line: "Guides how development moves through city systems, approvals, and public policy.",
+    Icon: Building2,
+  },
+  {
+    title: "Banker",
+    role: "Capital strategy advisor",
+    primaryPath: "New Ownership",
+    supports: ["Family Equity", "Community Revitalization"] as const,
+    line: "Provides insight into how capital is evaluated, approved, and deployed.",
+    Icon: Landmark,
+  },
+  {
+    title: "Construction professor",
+    role: "Development & construction advisor",
+    primaryPath: "Community Revitalization",
+    supports: ["New Ownership", "Family Equity"] as const,
+    line: "Breaks down how projects move from concept to construction.",
+    Icon: HardHat,
+  },
+] as const;
+
 const SchoolPathways = () => {
   useEffect(() => {
     const previous = document.title;
-    document.title = "Pathways to Equity & Ownership | Let's Rebuild Tuskegee";
+    document.title = "Equity & Ownership School | Let's Rebuild Tuskegee";
     return () => {
       document.title = previous;
     };
@@ -115,14 +147,14 @@ const SchoolPathways = () => {
         <header className="space-y-4 text-center sm:text-left">
           <p className="text-sm font-semibold uppercase tracking-widest text-primary">Rebuild school (planned)</p>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-            {"Pathways to Equity & Ownership"}
+            {"Equity & Ownership School"}
           </h1>
-          <p className="text-xl font-medium text-foreground/90 max-w-2xl">
-            Three tracks, two content layers—structured curriculum plus a living podcast library.
+          <p className="text-lg font-medium text-primary max-w-2xl">
+            {"Pathways to equity & ownership"}
           </p>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            A blueprint for how donors and members move from support to applied learning, with every topic
-            available as both a clear lesson and a real conversation.
+            Real-world learning from operators—not theory alone. Three pathways, structured curriculum, and a
+            podcast library so every topic comes with clarity and context.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Button className="rounded-full" asChild>
@@ -184,6 +216,61 @@ const SchoolPathways = () => {
                       ))}
                     </ul>
                   </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-8" aria-labelledby="voices-heading">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Brain className="h-6 w-6 text-primary shrink-0" aria-hidden />
+              <h2 id="voices-heading" className="text-2xl font-bold">
+                Voices in Ownership
+              </h2>
+            </div>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              Learn from real operators across capital, policy, and development.
+            </p>
+            <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed border-l-2 border-primary/40 pl-4">
+              An advisory layer that sits across all three pathways—so learning stays grounded in how work
+              actually gets done, not slides alone. Insights come from people who run deals, systems, and sites.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {advisoryVoices.map(({ title, role, primaryPath, supports, line, Icon }) => (
+              <Card key={title} className="flex flex-col border-border/80 shadow-sm">
+                <CardHeader className="space-y-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Icon className="h-5 w-5" aria-hidden />
+                  </div>
+                  <CardTitle className="text-lg leading-snug capitalize">{title}</CardTitle>
+                  <CardDescription className="text-sm font-medium text-foreground/90 normal-case">
+                    {role}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-1 flex-col gap-4 pt-0">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Primary path
+                      </span>
+                      <Badge variant="secondary" className="w-fit">
+                        {primaryPath}
+                      </Badge>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Also supports
+                      </span>
+                      <p className="text-foreground/90">{supports.join(" · ")}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed mt-auto border-t border-border/60 pt-4">
+                    {line}
+                  </p>
                 </CardContent>
               </Card>
             ))}
