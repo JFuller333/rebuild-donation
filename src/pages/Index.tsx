@@ -2,12 +2,8 @@ import { Header } from "@/components/Header";
 import { FeaturedProjectsSection } from "@/components/FeaturedProjectsSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getShopifyStoreUrl } from "@/integrations/shopify/client";
 import { ArrowRight, Gift, GraduationCap, Hammer } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
-const shopDomain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN as string | undefined;
-const apparelStoreHref = shopDomain ? getShopifyStoreUrl() : null;
 
 const pillars = [
   {
@@ -17,14 +13,10 @@ const pillars = [
     body: "Shop apparel or give directly to a project—both support the mission.",
     actions: (
       <div className="flex flex-col sm:flex-row gap-3">
-        {apparelStoreHref ? (
-          <Button asChild className="rounded-full">
-            <a href={apparelStoreHref} target="_blank" rel="noreferrer">
-              Shop apparel
-            </a>
-          </Button>
-        ) : null}
-        <Button variant={apparelStoreHref ? "outline" : "default"} className="rounded-full" asChild>
+        <Button asChild className="rounded-full">
+          <Link to="/shop">Shop apparel</Link>
+        </Button>
+        <Button variant="outline" className="rounded-full" asChild>
           <a href="#projects">Give to a project</a>
         </Button>
       </div>

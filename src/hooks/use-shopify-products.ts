@@ -34,6 +34,14 @@ export function useProducts(options?: {
   });
 }
 
+/** Storefront search: products tagged `apparel` in Shopify (case-insensitive filter on client too). */
+export function useApparelProducts(first = 48) {
+  return useProducts({
+    first,
+    query: 'tag:apparel',
+  });
+}
+
 /**
  * Hook to get a collection by handle
  */
