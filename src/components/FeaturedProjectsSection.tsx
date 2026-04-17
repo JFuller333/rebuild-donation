@@ -5,7 +5,17 @@ import { shopifyProductToProjectCard } from "@/lib/shopify-adapters";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-export const FeaturedProjectsSection = () => {
+export type FeaturedProjectsSectionProps = {
+  /** Anchor id (home uses `projects` for #projects links). */
+  id?: string;
+  /** Set false on the dedicated featured-projects page when the page hero already introduces the section. */
+  showIntro?: boolean;
+};
+
+export const FeaturedProjectsSection = ({
+  id = "projects",
+  showIntro = true,
+}: FeaturedProjectsSectionProps = {}) => {
   const { data: productsData, isLoading, error } = useProducts({ first: 6 });
   const [projectStats, setProjectStats] = useState<Record<string, { goal: number; raised: number }>>({});
 
@@ -76,14 +86,16 @@ export const FeaturedProjectsSection = () => {
     }) || [];
 
   return (
-    <section id="projects" className="py-20">
+    <section id={id} className={showIntro ? "py-20" : "py-12 md:py-16"}>
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Projects</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            This block has a brighter future because of you. Support the projects making real change in our communities.
-          </p>
-        </div>
+        {showIntro ? (
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Projects</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              This block has a brighter future because of you. Support the projects making real change in our communities.
+            </p>
+          </div>
+        ) : null}
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20">

@@ -13,7 +13,7 @@ export const apparelProductPageCopy = {
   shopProcessSteps: [
     { step: 1, label: "Support the mission", to: "/shop" },
     { step: 2, label: "Access the school", to: "/school/pathways-to-equity-ownership" },
-    { step: 3, label: "Contribute to the developments", to: "/#projects" },
+    { step: 3, label: "Contribute to the developments", to: "/featured-projects" },
   ] as const,
 
   /** Optional thin promo under the header (e.g. “Free shipping over $50”). Empty = hidden. */

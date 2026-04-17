@@ -22,6 +22,7 @@ import SchoolPathways from "./pages/SchoolPathways";
 import SchoolModules from "./pages/SchoolModules";
 import SchoolLibrary from "./pages/SchoolLibrary";
 import Shop from "./pages/Shop";
+import FeaturedProjects from "./pages/FeaturedProjects";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/featured-projects" element={<FeaturedProjects />} />
           <Route path="/home-brand" element={<IndexBrandHome />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/products/:id" element={<ProductRouteTemplate />} />
