@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import SchoolPathways from "./pages/SchoolPathways";
 import SchoolModules from "./pages/SchoolModules";
+import SchoolLibrary from "./pages/SchoolLibrary";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
           <Route path="/school/pathways" element={<SchoolPathways />} />
           <Route path="/school/pathways-to-equity-ownership" element={<SchoolPathways />} />
           <Route path="/school/modules" element={<SchoolModules />} />
+          <Route path="/school/library" element={<SchoolLibrary />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

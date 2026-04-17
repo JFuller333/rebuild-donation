@@ -49,6 +49,9 @@ const SchoolModules = () => {
             <Button variant="outline" className="rounded-full" asChild>
               <Link to="/school/pathways-to-equity-ownership">School overview</Link>
             </Button>
+            <Button variant="outline" className="rounded-full" asChild>
+              <Link to="/school/library">{"Podcast & board library"}</Link>
+            </Button>
             <Button className="rounded-full" asChild>
               <Link to="/auth">Sign in for access</Link>
             </Button>

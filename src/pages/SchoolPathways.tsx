@@ -33,7 +33,7 @@ const futureNav = [
   { label: "Community Revitalization", note: "" },
   { label: "Voices in ownership", note: "Advisory layer across pathways" },
   { label: "Curriculum modules", note: "Per-pathway lessons (planned)" },
-  { label: "Library", note: "Podcast knowledge + resources" },
+  { label: "Library", note: "Podcast episodes + Voices of Leadership" },
   { label: "Podcast Knowledge", note: "Browse by topic, pathway, tags" },
   { label: "Resources", note: "Templates and downloads" },
   { label: "Community", note: "Discussions and cohorts" },
@@ -110,6 +110,9 @@ const SchoolPathways = () => {
             </Button>
             <Button variant="outline" className="rounded-full" asChild>
               <Link to="/school/modules">Curriculum modules</Link>
+            </Button>
+            <Button variant="outline" className="rounded-full" asChild>
+              <Link to="/school/library">{"Podcast & library"}</Link>
             </Button>
             <Button variant="outline" className="rounded-full" asChild>
               <Link to="/">Back to home</Link>
@@ -372,12 +375,15 @@ const SchoolPathways = () => {
               </CardTitle>
               <CardDescription>Organize for discovery, not only episode order</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
                 {podcastOrganization.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
+              <Button variant="outline" size="sm" className="rounded-full" asChild>
+                <Link to="/school/library">Open school library</Link>
+              </Button>
             </CardContent>
           </Card>
         </section>
