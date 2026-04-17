@@ -19,6 +19,7 @@ import CreateMyDonation from "./pages/CreateMyDonation";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import SchoolPathways from "./pages/SchoolPathways";
+import SchoolModules from "./pages/SchoolModules";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/school/pathways" element={<SchoolPathways />} />
           <Route path="/school/pathways-to-equity-ownership" element={<SchoolPathways />} />
+          <Route path="/school/modules" element={<SchoolModules />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

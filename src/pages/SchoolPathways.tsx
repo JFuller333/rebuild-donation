@@ -19,64 +19,11 @@ import {
   Sparkles,
   Wallet,
 } from "lucide-react";
+import { schoolPathways } from "@/data/school-pathways";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
-const pathways = [
-  {
-    title: "Family Equity Path",
-    subtitle: "For people who already have property but no structure",
-    lane: "Heirs property / legacy lane",
-    moduleCount: 6,
-    transformation: "From confusion → clarity → coordination → preserved ownership",
-    modules: [
-      "What is heirs property (real explanation)",
-      "Understanding title & deeds",
-      "Common ownership breakdowns",
-      "Family communication & alignment",
-      "Legal & structural options (LLCs, agreements)",
-      "Tax, risk awareness & transitioning to structured ownership",
-    ],
-    podcast: [
-      "Real family stories",
-      "Land loss scenarios",
-      "Conflict resolution conversations",
-    ],
-  },
-  {
-    title: "New Ownership Path",
-    subtitle: "For people starting from zero or close to it",
-    lane: "Foundation builder lane",
-    moduleCount: 6,
-    transformation: "From no ownership → first asset → repeatable strategy",
-    modules: [
-      "Ownership mindset (consumer → owner)",
-      "Credit & financial foundation",
-      "Income & capital strategy",
-      "First property strategy (home, land, investment)",
-      "Understanding deals",
-      "Entity setup & your first ownership stack",
-    ],
-    podcast: ["Beginner mistakes", "First deal breakdowns", "Mindset conversations"],
-  },
-  {
-    title: "Community Revitalization Path",
-    subtitle: "For builders, leaders, and developers",
-    lane: "LRT / ecosystem lane",
-    moduleCount: 7,
-    transformation: "From individual thinking → community-scale ownership & development",
-    modules: [
-      "What is community ownership?",
-      "HBCU community dynamics",
-      "Land acquisition for development",
-      "Funding & partnerships (grants, donors, investors)",
-      "Development process (concept → construction)",
-      "Legal & governance structures",
-      "Building sustainable ecosystems",
-    ],
-    podcast: ["LRT development journey", "Partnerships", "Funding conversations", "Real-time project updates"],
-  },
-] as const;
+const pathways = schoolPathways;
 
 const futureNav = [
   { label: "Dashboard", note: "Progress and next lesson" },
@@ -85,6 +32,7 @@ const futureNav = [
   { label: "New Ownership", note: "" },
   { label: "Community Revitalization", note: "" },
   { label: "Voices in ownership", note: "Advisory layer across pathways" },
+  { label: "Curriculum modules", note: "Per-pathway lessons (planned)" },
   { label: "Library", note: "Podcast knowledge + resources" },
   { label: "Podcast Knowledge", note: "Browse by topic, pathway, tags" },
   { label: "Resources", note: "Templates and downloads" },
@@ -161,17 +109,25 @@ const SchoolPathways = () => {
               <Link to="/auth">Sign in for access</Link>
             </Button>
             <Button variant="outline" className="rounded-full" asChild>
+              <Link to="/school/modules">Curriculum modules</Link>
+            </Button>
+            <Button variant="outline" className="rounded-full" asChild>
               <Link to="/">Back to home</Link>
             </Button>
           </div>
         </header>
 
         <section className="space-y-8" aria-labelledby="pathways-heading">
-          <div className="flex items-center gap-3">
-            <Compass className="h-6 w-6 text-primary shrink-0" aria-hidden />
-            <h2 id="pathways-heading" className="text-2xl font-bold">
-              The three pathways
-            </h2>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <Compass className="h-6 w-6 text-primary shrink-0" aria-hidden />
+              <h2 id="pathways-heading" className="text-2xl font-bold">
+                The three pathways
+              </h2>
+            </div>
+            <Button variant="outline" size="sm" className="rounded-full w-fit shrink-0" asChild>
+              <Link to="/school/modules">View all modules</Link>
+            </Button>
           </div>
 
           <div className="space-y-8">
@@ -201,7 +157,14 @@ const SchoolPathways = () => {
                     </p>
                     <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground leading-relaxed">
                       {path.modules.map((m) => (
-                        <li key={m}>{m}</li>
+                        <li key={m.id}>
+                          <Link
+                            to={`/school/modules?pathway=${path.slug}#${m.id}`}
+                            className="text-primary underline-offset-4 hover:underline"
+                          >
+                            {m.title}
+                          </Link>
+                        </li>
                       ))}
                     </ul>
                   </div>
