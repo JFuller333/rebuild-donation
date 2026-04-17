@@ -1,16 +1,21 @@
 /**
- * Product Detail Page - Displays Shopify Product
+ * Commerce product page — add to cart, standard checkout via cart (for apparel-tagged products).
  */
 
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProduct } from "@/hooks/use-shopify-products";
 import { useAddToCart } from "@/hooks/use-shopify-cart";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2, ShoppingCart } from "lucide-react";
-import { getDefaultVariant, getVariantPriceFormatted } from "@/lib/shopify-adapters";
+import {
+  getDefaultVariant,
+  getVariantPriceFormatted,
+} from "@/lib/shopify-adapters";
+import type { ProductVariant } from "@/integrations/shopify/types";
+import { cn } from "@/lib/utils";
 
 const ProductDetail = () => {
   const { id: handle } = useParams<{ id: string }>();
@@ -18,36 +23,44 @@ const ProductDetail = () => {
   const { toast } = useToast();
   const { data: product, isLoading, error } = useProduct(handle || "");
   const { mutate: addToCart, isPending: isAddingToCart } = useAddToCart();
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  const [previewIndex, setPreviewIndex] = useState(0);
 
-  const handleAddToCart = () => {
-    if (!product) return;
-
-    const variant = getDefaultVariant(product);
-    if (!variant) {
-      toast({
-        title: "Error",
-        description: "No available variant found",
-        variant: "destructive",
-      });
+  useEffect(() => {
+    if (!product) {
+      setSelectedVariant(null);
       return;
     }
+    const def = getDefaultVariant(product);
+    setSelectedVariant(def);
+    setPreviewIndex(0);
+  }, [product]);
+
+  useEffect(() => {
+    if (!selectedVariant?.image?.url || !product?.images.edges.length) return;
+    const idx = product.images.edges.findIndex(({ node }) => node.url === selectedVariant.image?.url);
+    if (idx >= 0) setPreviewIndex(idx);
+  }, [selectedVariant?.id, product]);
+
+  const handleAddToCart = () => {
+    if (!product || !selectedVariant) return;
 
     addToCart(
       {
-        merchandiseId: variant.id,
+        merchandiseId: selectedVariant.id,
         quantity: 1,
       },
       {
         onSuccess: () => {
           toast({
-            title: "Added to cart!",
-            description: `${product.title} has been added to your cart.`,
+            title: "Added to cart",
+            description: `${product.title} — open the cart to check out.`,
           });
         },
-        onError: (error) => {
+        onError: (err) => {
           toast({
-            title: "Error",
-            description: error.message,
+            title: "Could not add to cart",
+            description: err.message,
             variant: "destructive",
           });
         },
@@ -72,144 +85,141 @@ const ProductDetail = () => {
         <Header />
         <div className="container mx-auto px-4 py-20 text-center">
           <p className="text-destructive mb-4">Product not found</p>
-          <Button onClick={() => navigate("/")}>Back to Home</Button>
+          <Button onClick={() => navigate("/shop")}>Back to shop</Button>
         </div>
       </div>
     );
   }
 
-  const defaultVariant = getDefaultVariant(product);
-  const firstImage = product.images.edges[0]?.node?.url || "/placeholder.svg";
-  const price = defaultVariant
-    ? getVariantPriceFormatted(defaultVariant)
+  const mainImage =
+    product.images.edges[previewIndex]?.node?.url ||
+    selectedVariant?.image?.url ||
+    "/placeholder.svg";
+
+  const priceLabel = selectedVariant
+    ? getVariantPriceFormatted(selectedVariant)
     : new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: product.priceRange.minVariantPrice.currencyCode,
       }).format(parseFloat(product.priceRange.minVariantPrice.amount));
+
+  const variants = product.variants.edges.map((e) => e.node);
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
       <div className="mx-auto px-4 py-8 max-w-[1600px]">
-        <Button variant="ghost" onClick={() => navigate("/")} className="mb-6">
+        <Button variant="ghost" onClick={() => navigate("/shop")} className="mb-6">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Products
+          Back to shop
         </Button>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Product Image */}
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           <div className="space-y-4">
-            <div className="relative aspect-square rounded-xl overflow-hidden">
-              <img
-                src={firstImage}
-                alt={product.title}
-                className="w-full h-full object-cover"
-              />
+            <div className="relative aspect-square rounded-xl overflow-hidden bg-muted">
+              <img src={mainImage} alt={product.title} className="w-full h-full object-cover" />
             </div>
-            {product.images.edges.length > 1 && (
-              <div className="grid grid-cols-4 gap-4">
-                {product.images.edges.slice(1, 5).map(({ node: image }, index) => (
-                  <div
-                    key={index}
-                    className="relative aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+            {product.images.edges.length > 1 ? (
+              <div className="grid grid-cols-4 gap-3">
+                {product.images.edges.map(({ node: image }, index) => (
+                  <button
+                    key={image.id}
+                    type="button"
+                    onClick={() => setPreviewIndex(index)}
+                    className={cn(
+                      "relative aspect-square rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary ring-offset-2",
+                      previewIndex === index ? "ring-2 ring-primary" : "opacity-90 hover:opacity-100"
+                    )}
                   >
                     <img
                       src={image.url}
                       alt={image.altText || product.title}
                       className="w-full h-full object-cover"
                     />
-                  </div>
+                  </button>
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
 
-          {/* Product Info */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
-                {product.title}
-              </h1>
-              {product.vendor && (
+              <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-2">{product.title}</h1>
+              {product.vendor ? (
                 <p className="text-lg text-muted-foreground mb-4">By {product.vendor}</p>
-              )}
-              <p className="text-3xl font-bold text-primary mb-6">{price}</p>
+              ) : null}
+              <p className="text-3xl font-bold text-primary">{priceLabel}</p>
             </div>
 
-            {product.description && (
-              <div className="prose prose-lg max-w-none">
-                <div
-                  dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
-                  className="text-foreground leading-relaxed"
-                />
-              </div>
-            )}
+            {product.descriptionHtml ? (
+              <div
+                className="prose prose-sm md:prose-base max-w-none text-foreground [&_p]:leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
+              />
+            ) : null}
 
-            {/* Variants */}
-            {product.variants.edges.length > 1 && (
-              <div>
-                <h3 className="font-semibold mb-2">Variants</h3>
-                <div className="space-y-2">
-                  {product.variants.edges.map(({ node: variant }) => (
-                    <div
+            {variants.length > 1 ? (
+              <div className="space-y-2">
+                <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+                  Options
+                </h3>
+                <div className="flex flex-col gap-2">
+                  {variants.map((variant) => (
+                    <button
                       key={variant.id}
-                      className="flex items-center justify-between p-3 border rounded-lg"
+                      type="button"
+                      disabled={!variant.availableForSale}
+                      onClick={() => setSelectedVariant(variant)}
+                      className={cn(
+                        "flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left text-sm transition-colors",
+                        selectedVariant?.id === variant.id
+                          ? "border-primary bg-primary/5 ring-1 ring-primary"
+                          : "border-border hover:bg-muted/50",
+                        !variant.availableForSale && "opacity-50 cursor-not-allowed"
+                      )}
                     >
                       <span>{variant.title}</span>
-                      <span className="font-semibold">
+                      <span className="font-semibold tabular-nums">
                         {getVariantPriceFormatted(variant)}
                       </span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
-            )}
+            ) : null}
 
-            {/* Add to Cart */}
-            <div className="space-y-4">
+            <div className="space-y-3 pt-2">
               <Button
                 size="lg"
-                className="w-full text-base font-semibold"
+                className="w-full text-base font-semibold rounded-full"
                 onClick={handleAddToCart}
-                disabled={isAddingToCart || !product.availableForSale || !defaultVariant}
+                disabled={
+                  isAddingToCart ||
+                  !product.availableForSale ||
+                  !selectedVariant?.availableForSale
+                }
               >
                 {isAddingToCart ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Adding...
+                    Adding…
                   </>
                 ) : (
                   <>
                     <ShoppingCart className="mr-2 h-5 w-5" />
-                    Add to Cart
+                    Add to cart
                   </>
                 )}
               </Button>
-
-              {!product.availableForSale && (
-                <p className="text-sm text-destructive text-center">
-                  This product is currently unavailable
-                </p>
-              )}
+              <p className="text-center text-sm text-muted-foreground">
+                Use the cart icon in the header to review items and complete checkout.
+              </p>
             </div>
 
-            {/* Product Tags */}
-            {product.tags.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-2">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {product.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+            {!product.availableForSale ? (
+              <p className="text-sm text-destructive text-center">This product is currently unavailable.</p>
+            ) : null}
           </div>
         </div>
       </div>
@@ -218,4 +228,3 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
-

@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import IndexBrandHome from "./pages/IndexBrandHome";
 import ProjectDetail from "./pages/ProjectDetail";
-import ProductDetail from "./pages/ProductDetail";
+import ProductRouteTemplate from "./pages/ProductRouteTemplate";
 import Auth from "./pages/Auth";
 import DonorDashboard from "./pages/DonorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -36,7 +36,7 @@ const App = () => (
           <Route path="/shop" element={<Shop />} />
           <Route path="/home-brand" element={<IndexBrandHome />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
-          <Route path="/products/:id" element={<ProjectDetail />} />
+          <Route path="/products/:id" element={<ProductRouteTemplate />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/donor-dashboard" element={<DonorDashboard />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />

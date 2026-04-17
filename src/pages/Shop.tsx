@@ -8,19 +8,14 @@ import {
   isProductAvailable,
 } from "@/lib/shopify-adapters";
 import type { ShopifyProduct } from "@/integrations/shopify/types";
+import { APPAREL_TAG, isApparelProduct } from "@/lib/product-kind";
 import { Loader2 } from "lucide-react";
-
-const APPAREL_TAG = "apparel";
 
 function stripDescription(product: ShopifyProduct): string {
   const raw = product.description?.trim() || "";
   if (raw) return raw;
   const html = product.descriptionHtml || "";
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function productHasApparelTag(product: ShopifyProduct): boolean {
-  return (product.tags || []).some((t) => t.toLowerCase() === APPAREL_TAG);
 }
 
 function productCategoryLabel(product: ShopifyProduct): string {
@@ -32,9 +27,7 @@ const Shop = () => {
 
   const products = useMemo(() => {
     if (!data?.edges?.length) return [];
-    return data.edges
-      .map(({ node }) => node)
-      .filter((node) => productHasApparelTag(node));
+    return data.edges.map(({ node }) => node).filter((node) => isApparelProduct(node));
   }, [data]);
 
   return (
