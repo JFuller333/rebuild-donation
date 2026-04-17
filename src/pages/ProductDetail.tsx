@@ -1,19 +1,22 @@
 /**
- * Commerce product page — add to cart, standard checkout via cart (for apparel-tagged products).
+ * Commerce product page — add to cart, checkout via header cart (apparel-tagged products).
+ *
+ * Content from Shopify: title, description HTML, images, variants, prices, vendor.
+ * Static copy: edit `src/config/apparel-product-page.ts`
+ * Layout/styling: this file.
  */
 
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { apparelProductPageCopy } from "@/config/apparel-product-page";
 import { useProduct } from "@/hooks/use-shopify-products";
 import { useAddToCart } from "@/hooks/use-shopify-cart";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2, ShoppingCart } from "lucide-react";
-import {
-  getDefaultVariant,
-  getVariantPriceFormatted,
-} from "@/lib/shopify-adapters";
+import { getDefaultVariant, getVariantPriceFormatted } from "@/lib/shopify-adapters";
 import type { ProductVariant } from "@/integrations/shopify/types";
 import { cn } from "@/lib/utils";
 
@@ -109,26 +112,33 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <div className="mx-auto px-4 py-8 max-w-[1600px]">
-        <Button variant="ghost" onClick={() => navigate("/shop")} className="mb-6">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to shop
-        </Button>
+      <div className="border-b border-border bg-secondary/20">
+        <div className="container mx-auto px-4 py-6 md:py-8 max-w-6xl">
+          <Button variant="ghost" className="-ml-2 mb-2" onClick={() => navigate("/shop")}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to shop
+          </Button>
+          <p className="text-sm font-semibold uppercase tracking-widest text-primary">
+            {apparelProductPageCopy.eyebrow}
+          </p>
+        </div>
+      </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-          <div className="space-y-4">
-            <div className="relative aspect-square rounded-xl overflow-hidden bg-muted">
+      <div className="container mx-auto px-4 py-8 md:py-12 max-w-6xl">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-14 items-start">
+          <div className="space-y-4 lg:sticky lg:top-24">
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted shadow-sm ring-1 ring-border/60">
               <img src={mainImage} alt={product.title} className="w-full h-full object-cover" />
             </div>
             {product.images.edges.length > 1 ? (
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
                 {product.images.edges.map(({ node: image }, index) => (
                   <button
                     key={image.id}
                     type="button"
                     onClick={() => setPreviewIndex(index)}
                     className={cn(
-                      "relative aspect-square rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary ring-offset-2",
+                      "relative aspect-square rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
                       previewIndex === index ? "ring-2 ring-primary" : "opacity-90 hover:opacity-100"
                     )}
                   >
@@ -143,27 +153,35 @@ const ProductDetail = () => {
             ) : null}
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-2">{product.title}</h1>
+          <div className="space-y-6 min-w-0">
+            <div className="space-y-3">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">{product.title}</h1>
               {product.vendor ? (
-                <p className="text-lg text-muted-foreground mb-4">By {product.vendor}</p>
+                <p className="text-base text-muted-foreground">By {product.vendor}</p>
               ) : null}
-              <p className="text-3xl font-bold text-primary">{priceLabel}</p>
+              <p className="text-3xl md:text-4xl font-bold text-primary tabular-nums">{priceLabel}</p>
+              {apparelProductPageCopy.missionLine ? (
+                <p className="text-sm text-muted-foreground leading-relaxed max-w-lg pt-1">
+                  {apparelProductPageCopy.missionLine}
+                </p>
+              ) : null}
             </div>
 
             {product.descriptionHtml ? (
-              <div
-                className="prose prose-sm md:prose-base max-w-none text-foreground [&_p]:leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
-              />
+              <>
+                <Separator className="my-2" />
+                <div
+                  className="prose prose-sm md:prose-base max-w-none text-foreground prose-headings:font-semibold prose-a:text-primary [&_p]:leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
+                />
+              </>
             ) : null}
 
             {variants.length > 1 ? (
-              <div className="space-y-2">
-                <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+              <div className="space-y-3">
+                <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
                   Options
-                </h3>
+                </h2>
                 <div className="flex flex-col gap-2">
                   {variants.map((variant) => (
                     <button
@@ -172,15 +190,15 @@ const ProductDetail = () => {
                       disabled={!variant.availableForSale}
                       onClick={() => setSelectedVariant(variant)}
                       className={cn(
-                        "flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left text-sm transition-colors",
+                        "flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left text-sm transition-colors",
                         selectedVariant?.id === variant.id
                           ? "border-primary bg-primary/5 ring-1 ring-primary"
                           : "border-border hover:bg-muted/50",
                         !variant.availableForSale && "opacity-50 cursor-not-allowed"
                       )}
                     >
-                      <span>{variant.title}</span>
-                      <span className="font-semibold tabular-nums">
+                      <span className="font-medium">{variant.title}</span>
+                      <span className="font-semibold tabular-nums text-primary">
                         {getVariantPriceFormatted(variant)}
                       </span>
                     </button>
@@ -189,10 +207,10 @@ const ProductDetail = () => {
               </div>
             ) : null}
 
-            <div className="space-y-3 pt-2">
+            <div className="space-y-4 pt-2">
               <Button
                 size="lg"
-                className="w-full text-base font-semibold rounded-full"
+                className="w-full text-base font-semibold rounded-full h-12 shadow-md shadow-primary/10"
                 onClick={handleAddToCart}
                 disabled={
                   isAddingToCart ||
@@ -212,13 +230,22 @@ const ProductDetail = () => {
                   </>
                 )}
               </Button>
-              <p className="text-center text-sm text-muted-foreground">
-                Use the cart icon in the header to review items and complete checkout.
+              <p className="text-center text-sm text-muted-foreground px-1">
+                {apparelProductPageCopy.checkoutHint}
               </p>
+              {apparelProductPageCopy.trustPoints.length > 0 ? (
+                <ul className="text-xs text-muted-foreground space-y-1.5 border-t border-border pt-4 max-w-md">
+                  {apparelProductPageCopy.trustPoints.map((line) => (
+                    <li key={line} className="leading-snug">
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
 
             {!product.availableForSale ? (
-              <p className="text-sm text-destructive text-center">This product is currently unavailable.</p>
+              <p className="text-sm text-destructive">This product is currently unavailable.</p>
             ) : null}
           </div>
         </div>
