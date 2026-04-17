@@ -1,17 +1,49 @@
 /**
- * Apparel product detail page — static copy and optional extras.
- * Edit here to customize messaging without changing ProductDetail.tsx layout.
- * Product title, description, images, and prices still come from Shopify.
+ * Apparel product detail page — static copy, tabs, highlights, promo.
+ * Product title, gallery, variants, and main description HTML still come from Shopify.
  */
+
 export const apparelProductPageCopy = {
-  /** Small label above the product title */
   eyebrow: "Shop · Apparel",
-  /** One line under the price (mission / impact). Empty string hides it. */
+
+  /** Optional thin promo under the header (e.g. “Free shipping over $50”). Empty = hidden. */
+  promoBanner: "",
+
+  /** Line under the price (mission). Shown in the buy box. */
   missionLine: "Every purchase supports Let's Rebuild Tuskegee.",
-  /** Shown under the primary button */
-  checkoutHint: "Use the cart icon in the header to review items and complete checkout.",
-  /** Short bullets below the CTA (shipping, returns, contact). Empty array hides. */
-  trustPoints: [
-    "Shipping and taxes are calculated at checkout.",
+
+  /**
+   * If set, shown as the short intro under the subtitle.
+   * If empty, we auto-generate a short excerpt from the Shopify description.
+   */
+  leadParagraph: "",
+
+  checkoutHint: "Open the cart in the header to review items and complete checkout.",
+
+  trustPoints: ["Shipping and taxes are calculated at checkout."] as const,
+
+  /** Rich HTML for the “Shipping & returns” tab */
+  shippingReturnsHtml: `
+    <p>Orders ship to addresses in the U.S. You’ll see shipping options and timing at checkout.</p>
+    <p class="mt-3">Questions about your order? Email <a href="mailto:build@letsrebuildtuskegee.org">build@letsrebuildtuskegee.org</a>.</p>
+  `.trim(),
+
+  /**
+   * Feature blocks below the main product (Wild Wonder–style “benefits” row).
+   * Set to [] to hide.
+   */
+  highlights: [
+    {
+      title: "Community impact",
+      body: "Apparel sales help fund transparent, neighborhood-led development projects.",
+    },
+    {
+      title: "Quality first",
+      body: "We work with suppliers and blanks we’re proud to put our name on.",
+    },
+    {
+      title: "Wear the mission",
+      body: "Show you’re part of rebuilding block by block—on campus, at home, and around town.",
+    },
   ] as const,
 } as const;
