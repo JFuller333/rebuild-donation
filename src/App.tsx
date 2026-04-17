@@ -18,6 +18,7 @@ import ManualOrderProcess from "./pages/ManualOrderProcess";
 import CreateMyDonation from "./pages/CreateMyDonation";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
+import SchoolPathways from "./pages/SchoolPathways";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/manual-order-process" element={<ManualOrderProcess />} />
           <Route path="/create-my-donation" element={<CreateMyDonation />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/school/pathways" element={<SchoolPathways />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

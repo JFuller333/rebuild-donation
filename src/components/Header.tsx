@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Menu, User, ShoppingCart } from "lucide-react";
+import { Menu, User, ShoppingCart, GraduationCap } from "lucide-react";
 import { CartSheet } from "@/components/CartSheet";
 import { useCartItemCount } from "@/hooks/use-shopify-cart";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -139,6 +139,14 @@ export const Header = () => {
               Sign In
             </Button>
           )}
+          <Button
+            variant="ghost"
+            className="hidden md:inline-flex gap-2"
+            onClick={() => navigate("/school/pathways")}
+          >
+            <GraduationCap className="h-4 w-4" />
+            School pathways
+          </Button>
           <Button 
             variant="ghost" 
             className="hidden md:inline-flex"
