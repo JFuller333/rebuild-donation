@@ -6,6 +6,16 @@
 export const apparelProductPageCopy = {
   eyebrow: "Shop · Apparel",
 
+  /**
+   * Compact header strip: numbered flow (shown next to the eyebrow on the PDP).
+   * Set to [] to hide.
+   */
+  shopProcessSteps: [
+    { step: 1, label: "Support the mission" },
+    { step: 2, label: "Access the school" },
+    { step: 3, label: "Contribute to the developments" },
+  ] as const,
+
   /** Optional thin promo under the header (e.g. “Free shipping over $50”). Empty = hidden. */
   promoBanner: "",
 
