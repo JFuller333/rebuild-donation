@@ -18,15 +18,17 @@ type ApparelShopBarProps = {
   showBack?: boolean;
 };
 
+/** Link is a large hit target; focus ring appears on the circle only via `group-focus-visible:*`. */
 const stepLinkClass =
-  "group rounded-lg outline-none transition-colors hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-secondary/20";
+  "group rounded-lg outline-none transition-colors focus-visible:outline-none";
 
 const activeStepCircle = (isActive: boolean) =>
   cn(
-    "flex shrink-0 items-center justify-center rounded-full border-2 font-bold shadow-md transition",
+    "relative z-0 flex shrink-0 items-center justify-center rounded-full border-2 font-bold shadow-md transition",
+    "group-focus-visible:z-10 group-focus-visible:ring-2 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-secondary/20",
     isActive
-      ? "border-yellow-600 bg-yellow-300 text-yellow-950 ring-2 ring-yellow-400/70 ring-offset-2 ring-offset-secondary/20"
-      : "border-primary bg-background text-primary ring-2 ring-secondary/40 group-hover:border-primary group-hover:ring-primary/20 md:border-primary md:bg-primary/10 md:ring-4 md:ring-secondary/30 md:group-hover:bg-primary/15 md:group-hover:ring-primary/15"
+      ? "border-yellow-600 bg-yellow-300 text-yellow-950 ring-2 ring-yellow-400/70 group-focus-visible:ring-yellow-800"
+      : "border-primary bg-background text-primary ring-2 ring-secondary/40 group-hover:border-primary group-hover:ring-primary/20 group-focus-visible:ring-primary md:border-primary md:bg-primary/10 md:ring-4 md:ring-secondary/30 md:group-hover:bg-primary/15 md:group-hover:ring-primary/15 md:group-focus-visible:ring-2 md:group-focus-visible:ring-primary"
   );
 
 export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
