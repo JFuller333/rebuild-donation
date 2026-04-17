@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ProjectCard } from "@/components/ProjectCard";
 import { useProducts } from "@/hooks/use-shopify-products";
 import { shopifyProductToProjectCard } from "@/lib/shopify-adapters";
+import { isApparelProduct } from "@/lib/product-kind";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -16,14 +17,20 @@ export const FeaturedProjectsSection = ({
   id = "projects",
   showIntro = true,
 }: FeaturedProjectsSectionProps = {}) => {
-  const { data: productsData, isLoading, error } = useProducts({ first: 6 });
+  /** Fetch extra products so we still have up to 6 after removing `apparel`-tagged shop items. */
+  const { data: productsData, isLoading, error } = useProducts({ first: 48 });
   const [projectStats, setProjectStats] = useState<Record<string, { goal: number; raised: number }>>({});
+
+  const projectProductEdges = useMemo(() => {
+    if (!productsData?.edges?.length) return [];
+    return productsData.edges
+      .filter(({ node }) => !isApparelProduct(node))
+      .slice(0, 6);
+  }, [productsData]);
 
   useEffect(() => {
     const handles =
-      productsData?.edges
-        ?.map(({ node }) => node.handle)
-        .filter((handle): handle is string => Boolean(handle)) || [];
+      projectProductEdges.map(({ node }) => node.handle).filter((handle): handle is string => Boolean(handle)) || [];
 
     if (!handles.length) {
       setProjectStats({});
@@ -62,10 +69,10 @@ export const FeaturedProjectsSection = ({
     return () => {
       isCancelled = true;
     };
-  }, [productsData]);
+  }, [projectProductEdges]);
 
   const featuredProjects =
-    productsData?.edges.map(({ node: product }) => {
+    projectProductEdges.map(({ node: product }) => {
       const base = shopifyProductToProjectCard(product, {
         useVendorAsLocation: true,
       });
