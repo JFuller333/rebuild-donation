@@ -1,3 +1,4 @@
+import { ApparelShopBar } from "@/components/ApparelShopBar";
 import { Header } from "@/components/Header";
 import { FeaturedProjectsSection } from "@/components/FeaturedProjectsSection";
 
@@ -9,6 +10,8 @@ const FeaturedProjects = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+
+      <ApparelShopBar />
 
       <section className="border-b border-border bg-secondary/20">
         <div className="container mx-auto px-4 py-10 md:py-12 max-w-4xl text-center">
