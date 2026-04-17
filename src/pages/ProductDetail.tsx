@@ -8,6 +8,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { ApparelShopBar } from "@/components/ApparelShopBar";
 import { Header } from "@/components/Header";
 import { ShopProductCard } from "@/components/ShopProductCard";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,7 @@ import { useApparelProducts, useProduct } from "@/hooks/use-shopify-products";
 import { useAddToCart } from "@/hooks/use-shopify-cart";
 import { useToast } from "@/hooks/use-toast";
 import type { ShopifyProduct } from "@/integrations/shopify/types";
-import { ArrowLeft, Loader2, Minus, Plus, ShoppingCart } from "lucide-react";
+import { Loader2, Minus, Plus, ShoppingCart } from "lucide-react";
 import {
   getDefaultVariant,
   getProductImageUrl,
@@ -197,46 +198,7 @@ const ProductDetail = () => {
         </div>
       ) : null}
 
-      <div className="border-b border-border bg-secondary/20">
-        <div className="container mx-auto px-4 py-2 md:py-2.5 max-w-6xl">
-          <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4 sm:gap-y-1">
-            <div className="flex items-center gap-2 min-w-0">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 -ml-2 px-2 text-xs text-muted-foreground shrink-0"
-                onClick={() => navigate("/shop")}
-              >
-                <ArrowLeft className="mr-1 h-3.5 w-3.5" />
-                Back
-              </Button>
-              <span className="text-muted-foreground/50 hidden sm:inline" aria-hidden>
-                |
-              </span>
-              <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-primary truncate">
-                {apparelProductPageCopy.eyebrow}
-              </p>
-            </div>
-            {apparelProductPageCopy.shopProcessSteps.length > 0 ? (
-              <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] sm:text-[11px] leading-tight pl-0 list-none m-0 sm:justify-end">
-                {apparelProductPageCopy.shopProcessSteps.map((item, index) => (
-                  <li key={item.step} className="flex items-center gap-1.5">
-                    {index > 0 ? (
-                      <span className="text-muted-foreground/40 select-none px-0.5" aria-hidden>
-                        ·
-                      </span>
-                    ) : null}
-                    <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-primary/15 px-1 text-[9px] font-bold tabular-nums text-primary">
-                      {item.step}
-                    </span>
-                    <span className="text-muted-foreground">{item.label}</span>
-                  </li>
-                ))}
-              </ol>
-            ) : null}
-          </div>
-        </div>
-      </div>
+      <ApparelShopBar showBack />
 
       <div className="container mx-auto px-4 py-8 md:py-12 max-w-6xl">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-14 items-start">

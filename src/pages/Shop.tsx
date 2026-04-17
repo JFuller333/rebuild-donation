@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { ApparelShopBar } from "@/components/ApparelShopBar";
 import { Header } from "@/components/Header";
 import { ShopProductCard } from "@/components/ShopProductCard";
 import { useApparelProducts } from "@/hooks/use-shopify-products";
@@ -34,9 +35,10 @@ const Shop = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
+      <ApparelShopBar />
+
       <section className="border-b border-border bg-secondary/20">
-        <div className="container mx-auto px-4 py-12 md:py-16">
-          <p className="text-sm font-semibold uppercase tracking-widest text-primary mb-2">Shop</p>
+        <div className="container mx-auto px-4 py-8 md:py-10 max-w-6xl">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">Apparel</h1>
           <p className="text-muted-foreground max-w-2xl text-lg">
             Only products tagged <span className="font-medium text-foreground">{APPAREL_TAG}</span> in Shopify
