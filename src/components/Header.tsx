@@ -142,10 +142,10 @@ export const Header = () => {
           <Button
             variant="ghost"
             className="hidden md:inline-flex gap-2"
-            onClick={() => navigate("/school/pathways")}
+            onClick={() => navigate("/school/pathways-to-equity-ownership")}
           >
             <GraduationCap className="h-4 w-4" />
-            School pathways
+            {"Equity & ownership"}
           </Button>
           <Button 
             variant="ghost" 

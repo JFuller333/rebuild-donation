@@ -15,6 +15,7 @@ import {
   Sparkles,
   Wallet,
 } from "lucide-react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const pathways = [
@@ -75,7 +76,7 @@ const pathways = [
 
 const futureNav = [
   { label: "Dashboard", note: "Progress and next lesson" },
-  { label: "Pathways", note: "Entry to all three tracks" },
+  { label: "Pathways to equity & ownership", note: "Entry to all three tracks" },
   { label: "Family Equity", note: "" },
   { label: "New Ownership", note: "" },
   { label: "Community Revitalization", note: "" },
@@ -98,6 +99,14 @@ const lessonBlueprint = [
 const podcastOrganization = ["Topic (e.g. heirs property, credit, development)", "Pathway (auto-linked)", "Tags"];
 
 const SchoolPathways = () => {
+  useEffect(() => {
+    const previous = document.title;
+    document.title = "Pathways to Equity & Ownership | Let's Rebuild Tuskegee";
+    return () => {
+      document.title = previous;
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
@@ -105,10 +114,15 @@ const SchoolPathways = () => {
       <div className="mx-auto max-w-4xl px-6 py-12 space-y-16">
         <header className="space-y-4 text-center sm:text-left">
           <p className="text-sm font-semibold uppercase tracking-widest text-primary">Rebuild school (planned)</p>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">Three pathways, two content layers</h1>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+            {"Pathways to Equity & Ownership"}
+          </h1>
+          <p className="text-xl font-medium text-foreground/90 max-w-2xl">
+            Three tracks, two content layers—structured curriculum plus a living podcast library.
+          </p>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            A blueprint for how donors and members move from support to structured learning—and how curriculum
-            and podcast work together as one system.
+            A blueprint for how donors and members move from support to applied learning, with every topic
+            available as both a clear lesson and a real conversation.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Button className="rounded-full" asChild>

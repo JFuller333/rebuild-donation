@@ -41,7 +41,7 @@ const pillars = [
           <Link to="/auth">Sign in to the school</Link>
         </Button>
         <Button variant="outline" className="rounded-full w-full sm:w-auto" asChild>
-          <Link to="/school/pathways">School pathways</Link>
+          <Link to="/school/pathways-to-equity-ownership">{"Pathways to equity & ownership"}</Link>
         </Button>
       </div>
     ),
