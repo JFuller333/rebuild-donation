@@ -37,17 +37,7 @@ const Shop = () => {
 
       <ApparelShopBar />
 
-      <section className="border-b border-border bg-secondary/20">
-        <div className="container mx-auto px-4 py-8 md:py-10 max-w-6xl">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">Apparel</h1>
-          <p className="text-muted-foreground max-w-2xl text-lg">
-            Only products tagged <span className="font-medium text-foreground">{APPAREL_TAG}</span> in Shopify
-            appear here.
-          </p>
-        </div>
-      </section>
-
-      <section className="py-16">
+      <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-24">
