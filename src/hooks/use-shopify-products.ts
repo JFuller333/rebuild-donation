@@ -4,7 +4,12 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { getProductByHandle, getProducts, getCollectionByHandle } from '@/integrations/shopify/queries';
+import {
+  getProductByHandle,
+  getProducts,
+  getCollectionByHandle,
+  getProductByShopifyAdminId,
+} from '@/integrations/shopify/queries';
 import type { ShopifyProduct } from '@/integrations/shopify/types';
 
 /**
@@ -39,6 +44,15 @@ export function useApparelProducts(first = 48) {
   return useProducts({
     first,
     query: 'tag:apparel',
+  });
+}
+
+export function usePinnedApparelProduct(adminProductId: string) {
+  return useQuery({
+    queryKey: ['product', 'shopify-admin-id', adminProductId],
+    queryFn: () => getProductByShopifyAdminId(adminProductId),
+    enabled: !!adminProductId,
+    staleTime: 1000 * 60 * 5,
   });
 }
 
