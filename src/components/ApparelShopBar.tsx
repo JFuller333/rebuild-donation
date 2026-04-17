@@ -2,7 +2,16 @@ import { Button } from "@/components/ui/button";
 import { apparelProductPageCopy } from "@/config/apparel-product-page";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
+/** Which timeline step (1–3) matches the current route, or null if none. */
+function activeStepForPath(pathname: string): number | null {
+  if (pathname === "/shop" || pathname.startsWith("/products/")) return 1;
+  if (pathname.startsWith("/school")) return 2;
+  if (pathname === "/featured-projects") return 3;
+  return null;
+}
 
 type ApparelShopBarProps = {
   /** Show a compact “Back” control (product detail → shop). */
@@ -12,8 +21,18 @@ type ApparelShopBarProps = {
 const stepLinkClass =
   "group rounded-lg outline-none transition-colors hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-secondary/20";
 
+const activeStepCircle = (isActive: boolean) =>
+  cn(
+    "flex shrink-0 items-center justify-center rounded-full border-2 font-bold shadow-md transition",
+    isActive
+      ? "border-yellow-600 bg-yellow-300 text-yellow-950 ring-2 ring-yellow-400/70 ring-offset-2 ring-offset-secondary/20"
+      : "border-primary bg-background text-primary ring-2 ring-secondary/40 group-hover:border-primary group-hover:ring-primary/20 md:border-primary md:bg-primary/10 md:ring-4 md:ring-secondary/30 md:group-hover:bg-primary/15 md:group-hover:ring-primary/15"
+  );
+
 export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const activeStep = useMemo(() => activeStepForPath(pathname), [pathname]);
   const steps = apparelProductPageCopy.shopProcessSteps;
 
   return (
@@ -47,19 +66,24 @@ export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
             <>
               {/* Mobile: vertical timeline */}
               <ol className="w-full max-w-md list-none space-y-0 pl-0 text-left md:hidden">
-                {steps.map((item, index) => (
+                {steps.map((item, index) => {
+                  const isActive = activeStep === item.step;
+                  return (
                   <li key={item.step}>
                     <Link
                       to={item.to}
                       className={cn(
                         stepLinkClass,
                         "-m-1 flex gap-3 p-1 pb-7 last:pb-1",
-                        "text-muted-foreground hover:text-foreground"
+                        isActive
+                          ? "bg-yellow-400/15 text-foreground"
+                          : "text-muted-foreground hover:text-foreground"
                       )}
                       aria-label={`Step ${item.step}: ${item.label}`}
+                      aria-current={isActive ? "step" : undefined}
                     >
                       <span className="flex w-10 shrink-0 flex-col items-center">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary bg-background text-sm font-bold text-primary shadow-md ring-2 ring-secondary/40 transition group-hover:border-primary group-hover:ring-primary/20">
+                        <span className={cn(activeStepCircle(isActive), "h-10 w-10 text-sm")}>
                           <span className="sr-only">Step {item.step}</span>
                           <span aria-hidden>{item.step}</span>
                         </span>
@@ -70,27 +94,38 @@ export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
                           />
                         ) : null}
                       </span>
-                      <span className="min-w-0 flex-1 pt-1.5 text-sm font-medium leading-snug group-hover:text-foreground">
+                      <span
+                        className={cn(
+                          "min-w-0 flex-1 pt-1.5 text-sm font-medium leading-snug group-hover:text-foreground",
+                          isActive && "font-semibold text-foreground"
+                        )}
+                      >
                         {item.label}
                       </span>
                     </Link>
                   </li>
-                ))}
+                  );
+                })}
               </ol>
 
               {/* Desktop: horizontal timeline */}
               <ol className="hidden w-full max-w-5xl list-none flex-row items-start gap-0 pl-0 md:flex">
                 {steps.map((item, index) => {
                   const last = index === steps.length - 1;
+                  const isActive = activeStep === item.step;
                   return (
                     <li key={item.step} className="flex min-w-0 flex-1 flex-col items-stretch">
                       <Link
                         to={item.to}
                         className={cn(
                           stepLinkClass,
-                          "flex flex-col items-center gap-3 p-1 text-muted-foreground hover:text-foreground"
+                          "flex flex-col items-center gap-3 p-1",
+                          isActive
+                            ? "bg-yellow-400/15 text-foreground hover:text-foreground"
+                            : "text-muted-foreground hover:text-foreground"
                         )}
                         aria-label={`Step ${item.step}: ${item.label}`}
+                        aria-current={isActive ? "step" : undefined}
                       >
                         <span className="flex w-full items-center">
                           <span
@@ -100,7 +135,7 @@ export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
                             )}
                             aria-hidden
                           />
-                          <span className="mx-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-primary/10 text-base font-bold text-primary shadow-md ring-4 ring-secondary/30 transition group-hover:border-primary group-hover:bg-primary/15 group-hover:ring-primary/15">
+                          <span className={cn(activeStepCircle(isActive), "mx-2 h-11 w-11 text-base")}>
                             <span className="sr-only">Step {item.step}</span>
                             <span aria-hidden>{item.step}</span>
                           </span>
@@ -112,7 +147,12 @@ export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
                             aria-hidden
                           />
                         </span>
-                        <span className="max-w-[14rem] px-1 text-center text-sm font-medium leading-snug group-hover:text-foreground">
+                        <span
+                          className={cn(
+                            "max-w-[14rem] px-1 text-center text-sm font-medium leading-snug group-hover:text-foreground",
+                            isActive && "font-semibold text-foreground"
+                          )}
+                        >
                           {item.label}
                         </span>
                       </Link>
