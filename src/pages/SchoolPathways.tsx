@@ -2,54 +2,20 @@ import { Header } from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import {
   BookOpen,
   Brain,
   Building2,
   Compass,
-  GitBranch,
   HardHat,
   Landmark,
-  Layers,
-  Library,
-  Link2,
   Mic,
-  Route,
-  Sparkles,
-  Wallet,
 } from "lucide-react";
 import { schoolPathways } from "@/data/school-pathways";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const pathways = schoolPathways;
-
-const futureNav = [
-  { label: "Dashboard", note: "Progress and next lesson" },
-  { label: "Pathways to equity & ownership", note: "Entry to all three tracks" },
-  { label: "Family Equity", note: "" },
-  { label: "New Ownership", note: "" },
-  { label: "Community Revitalization", note: "" },
-  { label: "Voices in ownership", note: "Advisory layer across pathways" },
-  { label: "Curriculum modules", note: "Per-pathway lessons (planned)" },
-  { label: "Library", note: "Podcast episodes + Voices in Leadership" },
-  { label: "Podcast Knowledge", note: "Browse by topic, pathway, tags" },
-  { label: "Resources", note: "Templates and downloads" },
-  { label: "Community", note: "Discussions and cohorts" },
-];
-
-const lessonBlueprint = [
-  "Title",
-  "Key idea",
-  "Breakdown",
-  "Framework",
-  "Action step",
-  "Resource",
-  "Related podcast conversations (linked clips)",
-];
-
-const podcastOrganization = ["Topic (e.g. heirs property, credit, development)", "Pathway (auto-linked)", "Tags"];
 
 const advisoryVoices = [
   {
@@ -240,221 +206,6 @@ const SchoolPathways = () => {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        </section>
-
-        <Separator />
-
-        <section className="space-y-6" aria-labelledby="layers-heading">
-          <div className="flex items-center gap-3">
-            <Layers className="h-6 w-6 text-primary shrink-0" aria-hidden />
-            <h2 id="layers-heading" className="text-2xl font-bold">
-              Two content layers
-            </h2>
-          </div>
-          <p className="text-muted-foreground">
-            Every serious topic exists in both forms so people get clarity from lessons and context from
-            conversation.
-          </p>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <BookOpen className="h-5 w-5 text-primary" aria-hidden />
-                  Layer 1: Curriculum
-                </CardTitle>
-                <CardDescription>Structured — your authority</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
-                  <li>Clean lessons and step-by-step thinking</li>
-                  <li>Frameworks and definitions</li>
-                  <li>Clear action steps</li>
-                </ul>
-                <p className="mt-4 text-sm font-medium text-foreground">This is what people pay for.</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Library className="h-5 w-5 text-primary" aria-hidden />
-                  Layer 2: Podcast library
-                </CardTitle>
-                <CardDescription>Dynamic — your living brain</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
-                  <li>Raw conversations and real stories</li>
-                  <li>Evolving ideas and breakdowns</li>
-                </ul>
-                <p className="mt-4 text-sm font-medium text-foreground">This is what keeps the platform alive.</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="border-primary/20 bg-primary/5">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Link2 className="h-5 w-5 text-primary" aria-hidden />
-                How they work together
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm text-muted-foreground leading-relaxed">
-              <p>
-                <span className="font-semibold text-foreground">Example — heirs property:</span> Curriculum delivers
-                a foundational lesson: &quot;What is heirs property?&quot; The podcast offers a parallel
-                conversation: &quot;We talked to someone dealing with twelve heirs on one lot…&quot;
-              </p>
-              <p className="font-medium text-foreground">Learners get clarity plus context.</p>
-            </CardContent>
-          </Card>
-        </section>
-
-        <Separator />
-
-        <section className="space-y-6" aria-labelledby="app-structure-heading">
-          <div className="flex items-center gap-3">
-            <Route className="h-6 w-6 text-primary shrink-0" aria-hidden />
-            <h2 id="app-structure-heading" className="text-2xl font-bold">
-              How this maps in the app
-            </h2>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Planned navigation</CardTitle>
-              <CardDescription>Simple IA to grow into as you ship modules</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {futureNav.map((item) => (
-                  <li key={item.label} className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4 text-sm border-b border-border/60 pb-3 last:border-0 last:pb-0">
-                    <span className="font-semibold text-foreground shrink-0 sm:w-52">{item.label}</span>
-                    {item.note ? <span className="text-muted-foreground">{item.note}</span> : null}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Inside a pathway</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
-                  <li>Modules</li>
-                  <li>Lessons</li>
-                  <li>Progress tracking</li>
-                  <li>Related discussions</li>
-                  <li>Attached podcast clips</li>
-                </ul>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Inside a lesson</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
-                  {lessonBlueprint.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Mic className="h-5 w-5 text-primary" aria-hidden />
-                Podcast library page
-              </CardTitle>
-              <CardDescription>Organize for discovery, not only episode order</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
-                {podcastOrganization.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-              <Button variant="outline" size="sm" className="rounded-full" asChild>
-                <Link to="/school/library">Open school library</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </section>
-
-        <Separator />
-
-        <section className="space-y-6" aria-labelledby="workflow-heading">
-          <div className="flex items-center gap-3">
-            <GitBranch className="h-6 w-6 text-primary shrink-0" aria-hidden />
-            <h2 id="workflow-heading" className="text-2xl font-bold">
-              Content workflow
-            </h2>
-          </div>
-          <p className="text-muted-foreground text-sm">
-            Each recording feeds both layers so nothing sits orphaned in one format.
-          </p>
-          <ol className="list-decimal pl-5 space-y-3 text-sm text-muted-foreground leading-relaxed max-w-2xl">
-            <li>Record podcast</li>
-            <li>Transcribe</li>
-            <li>
-              Extract: one lesson idea, one framework, one discussion question
-            </li>
-            <li>
-              Publish to the library (raw) and refine into curriculum (structured progression)
-            </li>
-          </ol>
-        </section>
-
-        <Separator />
-
-        <section className="space-y-6" aria-labelledby="monetization-heading">
-          <div className="flex items-center gap-3">
-            <Wallet className="h-6 w-6 text-primary shrink-0" aria-hidden />
-            <h2 id="monetization-heading" className="text-2xl font-bold">
-              Monetization (aligned with the model)
-            </h2>
-          </div>
-          <p className="text-muted-foreground text-sm max-w-2xl">
-            You are not selling &quot;podcast access.&quot; You are selling structured understanding and application.
-          </p>
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" aria-hidden />
-                  Free
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
-                  <li>Some podcast content</li>
-                  <li>Limited lessons</li>
-                  <li>Community access</li>
-                </ul>
-              </CardContent>
-            </Card>
-            <Card className="border-primary/30">
-              <CardHeader>
-                <CardTitle className="text-lg">Paid</CardTitle>
-                <CardDescription>Full learning product</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
-                  <li>Full pathways</li>
-                  <li>Full curriculum</li>
-                  <li>Resources and templates</li>
-                  <li>Structured progression</li>
-                  <li>Premium discussions</li>
-                </ul>
-              </CardContent>
-            </Card>
           </div>
         </section>
       </div>
