@@ -4,13 +4,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import {
-  getProductByHandle,
-  getProducts,
-  getCollectionByHandle,
-  getProductByShopifyAdminId,
-} from '@/integrations/shopify/queries';
-import type { ShopifyProduct } from '@/integrations/shopify/types';
+import { getProductByHandle, getProducts, getCollectionByHandle } from '@/integrations/shopify/queries';
 
 /**
  * Hook to get a single product by handle
@@ -36,23 +30,6 @@ export function useProducts(options?: {
     queryKey: ['products', options],
     queryFn: () => getProducts(options),
     staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-}
-
-/** Storefront search: products tagged `apparel` in Shopify (case-insensitive filter on client too). */
-export function useApparelProducts(first = 48) {
-  return useProducts({
-    first,
-    query: 'tag:apparel',
-  });
-}
-
-export function usePinnedApparelProduct(adminProductId: string) {
-  return useQuery({
-    queryKey: ['product', 'shopify-admin-id', adminProductId],
-    queryFn: () => getProductByShopifyAdminId(adminProductId),
-    enabled: !!adminProductId,
-    staleTime: 1000 * 60 * 5,
   });
 }
 

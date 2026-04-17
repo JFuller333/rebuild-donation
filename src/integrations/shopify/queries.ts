@@ -147,69 +147,6 @@ export const GET_PRODUCTS = `
   }
 `;
 
-/** Load a product by Shopify Admin numeric ID (Storefront GID). */
-export const GET_PRODUCT_NODE = `
-  query getProductNode($id: ID!) {
-    node(id: $id) {
-      ... on Product {
-        id
-        title
-        handle
-        description
-        descriptionHtml
-        availableForSale
-        tags
-        vendor
-        productType
-        images(first: 5) {
-          edges {
-            node {
-              id
-              url
-              altText
-              width
-              height
-            }
-          }
-        }
-        variants(first: 1) {
-          edges {
-            node {
-              id
-              title
-              price {
-                amount
-                currencyCode
-              }
-              compareAtPrice {
-                amount
-                currencyCode
-              }
-              availableForSale
-              quantityAvailable
-              image {
-                id
-                url
-                altText
-              }
-            }
-          }
-        }
-        priceRange {
-          minVariantPrice {
-            amount
-            currencyCode
-          }
-          maxVariantPrice {
-            amount
-            currencyCode
-          }
-        }
-      }
-    }
-  }
-`;
-
 /**
  * Get a collection by handle
  */
@@ -385,24 +322,6 @@ export async function getProductByHandle(handle: string): Promise<ShopifyProduct
     { handle }
   );
   return response.product;
-}
-
-/**
- * Load product by Admin product ID (e.g. 10415505146037) or full GID.
- */
-export async function getProductByShopifyAdminId(adminProductId: string): Promise<ShopifyProduct | null> {
-  const gid = adminProductId.startsWith("gid://")
-    ? adminProductId
-    : `gid://shopify/Product/${adminProductId}`;
-  const response = await shopifyQuery<{ node: ShopifyProduct | null | Record<string, unknown> }>(
-    GET_PRODUCT_NODE,
-    { id: gid }
-  );
-  const node = response.node;
-  if (!node || typeof node !== "object" || !("handle" in node)) {
-    return null;
-  }
-  return node as ShopifyProduct;
 }
 
 export async function getProducts(options?: {

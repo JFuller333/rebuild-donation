@@ -2,11 +2,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shirt } from "lucide-react";
+import { Package } from "lucide-react";
 
 type ShopProductCardProps = {
   id: string;
   title: string;
+  categoryLabel: string;
   image: string;
   priceLabel: string;
   description: string;
@@ -16,6 +17,7 @@ type ShopProductCardProps = {
 export const ShopProductCard = ({
   id,
   title,
+  categoryLabel,
   image,
   priceLabel,
   description,
@@ -42,8 +44,8 @@ export const ShopProductCard = ({
 
       <CardHeader className="space-y-2">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Shirt className="h-4 w-4" aria-hidden />
-          <span>Apparel</span>
+          <Package className="h-4 w-4 shrink-0" aria-hidden />
+          <span className="truncate">{categoryLabel}</span>
         </div>
         <h3 className="text-2xl font-bold leading-tight">{title}</h3>
       </CardHeader>
