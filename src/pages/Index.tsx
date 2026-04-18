@@ -74,10 +74,7 @@ const Index = () => {
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-6 max-w-2xl">
               Glad you&apos;re here! We love Tuskegee and believe this community deserves a bright next chapter. When you
               shop, fund a build, or join community development workshops, you carry Let&apos;s Rebuild Tuskegee&apos;s
-              mission forward. Every gift supports the same spirit of care. Let&apos;s Rebuild Tuskegee together! 
-              <span className="text-primary" role="img" aria-label="love">
-                ♥
-              </span>
+              mission forward. Every gift supports the same spirit of care. Let&apos;s Rebuild Tuskegee together!
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap gap-3">
               <Button
