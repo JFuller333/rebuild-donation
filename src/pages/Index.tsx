@@ -159,11 +159,6 @@ const Index = () => {
 
       <footer className="border-t border-black bg-black text-white py-12">
         <div className="container mx-auto px-4">
-          <p className="text-center text-sm text-white/70 mb-8">
-            <Link to="/home-brand" className="underline hover:text-white">
-              View the brand homepage backup (development)
-            </Link>
-          </p>
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="md:col-span-2">
               <h3 className="text-xl font-bold mb-4">Let's Rebuild Tuskegee</h3>
