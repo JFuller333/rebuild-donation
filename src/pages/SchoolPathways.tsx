@@ -151,7 +151,7 @@ const SchoolPathways = () => {
                   title="Replace with your channel or premiere link when ready"
                 >
                   <YouTubeMark className="h-5 w-5" />
-                  YouTube
+                  Watch on YouTube
                 </a>
               </Button>
             </CardContent>
