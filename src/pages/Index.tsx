@@ -10,16 +10,11 @@ const pillars = [
     step: 1,
     title: "Donate",
     icon: Gift,
-    body: "Shop apparel or give directly to a project—both support the mission.",
+    body: "Shop apparel—every purchase supports the mission.",
     actions: (
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Button asChild className="rounded-full">
-          <Link to="/shop">Shop apparel</Link>
-        </Button>
-        <Button variant="outline" className="rounded-full" asChild>
-          <a href="#projects">Give to a project</a>
-        </Button>
-      </div>
+      <Button asChild className="rounded-full">
+        <Link to="/shop">Shop apparel</Link>
+      </Button>
     ),
   },
   {
@@ -28,14 +23,9 @@ const pillars = [
     icon: GraduationCap,
     body: "As a donor or member, you get our online school—real guidance on building equity and ownership.",
     actions: (
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Button className="rounded-full w-full sm:w-auto" asChild>
-          <Link to="/auth">Sign in to the school</Link>
-        </Button>
-        <Button variant="outline" className="rounded-full w-full sm:w-auto" asChild>
-          <Link to="/school/pathways-to-equity-ownership">{"Pathways to equity & ownership"}</Link>
-        </Button>
-      </div>
+      <Button className="rounded-full w-full sm:w-auto" asChild>
+        <Link to="/auth">Sign in to the school</Link>
+      </Button>
     ),
   },
   {
