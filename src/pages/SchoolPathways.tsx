@@ -21,6 +21,9 @@ const pathways = schoolPathways;
 /** Toggle to show the “Curriculum pathways” block again (currently hidden). */
 const SHOW_CURRICULUM_PATHWAYS = false;
 
+/** Toggle to show the “Voices in Ownership” block again (currently hidden). */
+const SHOW_VOICES_IN_OWNERSHIP = false;
+
 /** Official-style YouTube mark (red play tile) for workshop listings. */
 function YouTubeMark({ className }: { className?: string }) {
   return (
@@ -232,60 +235,62 @@ const SchoolPathways = () => {
           </section>
         ) : null}
 
-        <section className="space-y-8" aria-labelledby="voices-heading">
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <Brain className="h-6 w-6 text-primary shrink-0" aria-hidden />
-              <h2 id="voices-heading" className="text-2xl font-bold">
-                Voices in Ownership
-              </h2>
+        {SHOW_VOICES_IN_OWNERSHIP ? (
+          <section className="space-y-8" aria-labelledby="voices-heading">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Brain className="h-6 w-6 text-primary shrink-0" aria-hidden />
+                <h2 id="voices-heading" className="text-2xl font-bold">
+                  Voices in Ownership
+                </h2>
+              </div>
+              <p className="text-lg text-muted-foreground max-w-2xl">
+                Learn from real operators across capital, policy, and development.
+              </p>
+              <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed border-l-2 border-primary/40 pl-4">
+                An advisory layer that sits across all three pathways—so learning stays grounded in how work
+                actually gets done, not slides alone. Insights come from people who run deals, systems, and sites.
+              </p>
             </div>
-            <p className="text-lg text-muted-foreground max-w-2xl">
-              Learn from real operators across capital, policy, and development.
-            </p>
-            <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed border-l-2 border-primary/40 pl-4">
-              An advisory layer that sits across all three pathways—so learning stays grounded in how work
-              actually gets done, not slides alone. Insights come from people who run deals, systems, and sites.
-            </p>
-          </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
-            {advisoryVoices.map(({ title, role, primaryPath, supports, line, Icon }) => (
-              <Card key={title} className="flex flex-col border-border/80 shadow-sm">
-                <CardHeader className="space-y-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Icon className="h-5 w-5" aria-hidden />
-                  </div>
-                  <CardTitle className="text-lg leading-snug capitalize">{title}</CardTitle>
-                  <CardDescription className="text-sm font-medium text-foreground/90 normal-case">
-                    {role}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-1 flex-col gap-4 pt-0">
-                  <div className="space-y-2 text-sm">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Primary path
-                      </span>
-                      <Badge variant="secondary" className="w-fit">
-                        {primaryPath}
-                      </Badge>
+            <div className="grid gap-6 md:grid-cols-3">
+              {advisoryVoices.map(({ title, role, primaryPath, supports, line, Icon }) => (
+                <Card key={title} className="flex flex-col border-border/80 shadow-sm">
+                  <CardHeader className="space-y-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <Icon className="h-5 w-5" aria-hidden />
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Also supports
-                      </span>
-                      <p className="text-foreground/90">{supports.join(" · ")}</p>
+                    <CardTitle className="text-lg leading-snug capitalize">{title}</CardTitle>
+                    <CardDescription className="text-sm font-medium text-foreground/90 normal-case">
+                      {role}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-1 flex-col gap-4 pt-0">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Primary path
+                        </span>
+                        <Badge variant="secondary" className="w-fit">
+                          {primaryPath}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Also supports
+                        </span>
+                        <p className="text-foreground/90">{supports.join(" · ")}</p>
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed mt-auto border-t border-border/60 pt-4">
-                    {line}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+                    <p className="text-sm text-muted-foreground leading-relaxed mt-auto border-t border-border/60 pt-4">
+                      {line}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </div>
   );
