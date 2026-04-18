@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
@@ -11,6 +11,10 @@ import type { Database } from "@/integrations/supabase/types";
 
 type Donation = Database["public"]["Tables"]["donations"]["Row"] & {
   projects: Database["public"]["Tables"]["projects"]["Row"] | null;
+  receipt_url?: string | null;
+  receipt_generated_at?: string | null;
+  shopify_order_name?: string | null;
+  shopify_product_handle?: string | null;
 };
 
 type TaxReceipt = Database["public"]["Tables"]["tax_receipts"]["Row"];
@@ -77,16 +81,19 @@ const DonorDashboard = () => {
       const total = (donationsData || []).reduce((sum, d) => sum + Number(d.amount), 0);
       setTotalDonated(total);
 
-      // Fetch tax receipts
+      // Fetch tax receipts (non-fatal — dashboard still loads if this fails)
       const { data: receiptsData, error: receiptsError } = await supabase
         .from("tax_receipts")
         .select("*")
         .eq("donor_id", userId)
         .order("year", { ascending: false });
 
-      if (receiptsError) throw receiptsError;
-
-      setTaxReceipts(receiptsData || []);
+      if (receiptsError) {
+        console.warn("tax_receipts:", receiptsError.message);
+        setTaxReceipts([]);
+      } else {
+        setTaxReceipts(receiptsData || []);
+      }
     } catch (error: any) {
       toast({
         title: "Error loading data",
@@ -109,6 +116,72 @@ const DonorDashboard = () => {
       month: "long",
       day: "numeric",
     });
+  };
+
+  const calendarYear = new Date().getFullYear();
+
+  const ytdDonations = useMemo(() => {
+    const start = new Date(Date.UTC(calendarYear, 0, 1)).getTime();
+    const end = Date.now();
+    return donations.filter((d) => {
+      if (!d.created_at) return false;
+      const t = new Date(d.created_at).getTime();
+      return t >= start && t <= end;
+    });
+  }, [donations, calendarYear]);
+
+  const ytdTotal = useMemo(
+    () => ytdDonations.reduce((sum, d) => sum + Number(d.amount), 0),
+    [ytdDonations]
+  );
+
+  const downloadYtdSummary = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      toast({
+        title: "Sign in required",
+        variant: "destructive",
+      });
+      return;
+    }
+    const year = new Date().getFullYear();
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-ytd-receipt?year=${year}`;
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(
+          typeof (err as { error?: string }).error === "string"
+            ? (err as { error: string }).error
+            : res.statusText
+        );
+      }
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `LRT-YTD-${year}.pdf`;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+      toast({ title: "Download started" });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Try again later";
+      toast({
+        title: "Could not generate summary",
+        description: message,
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -183,6 +256,28 @@ const DonorDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        <Card className="mb-8 border-primary/20 bg-primary/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" aria-hidden />
+              {calendarYear} year-to-date
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p>
+                <span className="font-semibold text-foreground">${ytdTotal.toLocaleString()}</span> total ·{" "}
+                {ytdDonations.length} gift{ytdDonations.length === 1 ? "" : "s"}
+              </p>
+              <p>Download a PDF summary of contributions in your account for this calendar year (through today).</p>
+            </div>
+            <Button type="button" onClick={downloadYtdSummary} className="shrink-0 rounded-full">
+              <FileDown className="h-4 w-4 mr-2" aria-hidden />
+              Download YTD summary (PDF)
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="donations" className="w-full">
