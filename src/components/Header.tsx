@@ -2,15 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Menu, User, ShoppingCart, GraduationCap, Library, Shirt } from "lucide-react";
-import { CartSheet } from "@/components/CartSheet";
+import { Hammer, Menu, Shirt, User, ShoppingCart, GraduationCap } from "lucide-react";
+import { useCartSheet } from "@/contexts/CartSheetContext";
 import { useCartItemCount } from "@/hooks/use-shopify-cart";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 export const Header = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [cartOpen, setCartOpen] = useState(false);
+  const { setCartOpen } = useCartSheet();
   const cartItemCount = useCartItemCount();
 
   useEffect(() => {
@@ -24,6 +24,15 @@ export const Header = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const goToBuild = () => {
+    const section = document.getElementById("projects");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    } else {
+      window.location.href = "/#projects";
+    }
+  };
 
   return (
     <>
@@ -46,36 +55,22 @@ export const Header = () => {
         </div>
         
         <div className="flex items-center gap-4">
-            {/* Cart Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative"
-              onClick={() => setCartOpen(true)}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
-                  {cartItemCount > 99 ? "99+" : cartItemCount}
-                </span>
-              )}
-            </Button>
-
           <Button
             variant="ghost"
             className="hidden md:inline-flex gap-2"
             onClick={() => navigate("/shop")}
           >
             <Shirt className="h-4 w-4" aria-hidden />
-            Shop
+            Donate
           </Button>
 
           <Button 
             variant="ghost" 
-            className="hidden md:inline-flex"
-            onClick={() => navigate("/projects/investment-tier-1")}
+            className="hidden md:inline-flex gap-2"
+            onClick={goToBuild}
           >
-            Donate
+            <Hammer className="h-4 w-4" aria-hidden />
+            Build
           </Button>
           {user && (
             <Button 
@@ -87,15 +82,6 @@ export const Header = () => {
               Donor Dashboard
             </Button>
           )}
-          {!user && (
-            <Button 
-              variant="ghost" 
-              className="hidden md:inline-flex"
-              onClick={() => navigate("/auth")}
-            >
-              Sign In
-            </Button>
-          )}
           <Button
             variant="ghost"
             className="hidden md:inline-flex gap-2"
@@ -104,14 +90,6 @@ export const Header = () => {
             <GraduationCap className="h-4 w-4" />
             Learn
           </Button>
-          <Button
-            variant="ghost"
-            className="hidden lg:inline-flex gap-2"
-            onClick={() => navigate("/school/library")}
-          >
-            <Library className="h-4 w-4" />
-            Podcast Library
-          </Button>
           <Button 
             variant="ghost" 
             className="hidden md:inline-flex"
@@ -119,19 +97,43 @@ export const Header = () => {
           >
             Contact Us
           </Button>
-          <Button 
-            onClick={() => navigate("/projects/investment-tier-1")}
-            className="rounded-full bg-[rgb(6,78,59)] text-white hover:bg-[rgb(16,87,70)] px-5"
-          >
-            Donate Now
-          </Button>
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            {!user && (
+              <Button
+                variant="ghost"
+                className="rounded-full px-3 text-sm whitespace-nowrap sm:px-4"
+                onClick={() => navigate("/auth")}
+              >
+                Sign In
+              </Button>
+            )}
+            <Button 
+              onClick={() => navigate("/projects/investment-tier-1")}
+              className="rounded-full bg-[rgb(6,78,59)] text-white hover:bg-[rgb(16,87,70)] px-4 sm:px-5"
+            >
+              Donate Now
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative text-white hover:text-white hover:bg-white/10 shrink-0"
+              onClick={() => setCartOpen(true)}
+              aria-label="Open shopping cart"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
+                  {cartItemCount > 99 ? "99+" : cartItemCount}
+                </span>
+              )}
+            </Button>
+          </div>
           <Button variant="ghost" size="icon" className="md:hidden">
             <Menu className="h-5 w-5" />
           </Button>
         </div>
       </div>
     </header>
-      <CartSheet open={cartOpen} onOpenChange={setCartOpen} />
     </>
   );
 };

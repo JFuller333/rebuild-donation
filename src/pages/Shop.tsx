@@ -37,6 +37,19 @@ const Shop = () => {
 
       <ApparelShopBar />
 
+      <div className="container mx-auto pl-10 pr-10 pt-10 pb-6 sm:pl-14 sm:pr-14 md:pt-12 md:pb-8 md:pl-16 md:pr-16 lg:pl-24 lg:pr-24">
+        <header className="mx-auto max-w-4xl space-y-6 text-left">
+          <p className="text-sm font-semibold uppercase tracking-widest text-primary">Support the mission</p>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+            Apparel sales help fund transparent, neighborhood-led development projects.
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
+            You order, we ship the gear to you, and the sale proceeds support Let&apos;s Rebuild Tuskegee. New items
+            land in the shop as we add them—check back for the latest drops.
+          </p>
+        </header>
+      </div>
+
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
           {isLoading ? (

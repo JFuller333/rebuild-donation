@@ -8,8 +8,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 /** Which timeline step (1–3) matches the current route, or null if none. */
 function activeStepForPath(pathname: string): number | null {
   if (pathname === "/shop" || pathname.startsWith("/products/")) return 1;
-  if (pathname.startsWith("/school")) return 2;
-  if (pathname === "/featured-projects") return 3;
+  if (pathname === "/featured-projects") return 2;
+  if (pathname.startsWith("/school")) return 3;
   return null;
 }
 
@@ -78,7 +78,7 @@ export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
                         stepLinkClass,
                         "-m-1 flex gap-3 p-1 pb-7 last:pb-1 text-muted-foreground hover:text-foreground"
                       )}
-                      aria-label={`Step ${item.step}: ${item.label}`}
+                      aria-label={`Step ${item.step}: ${item.title}. ${item.label}`}
                       aria-current={isActive ? "step" : undefined}
                     >
                       <span className="flex w-10 shrink-0 flex-col items-center">
@@ -93,8 +93,11 @@ export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
                           />
                         ) : null}
                       </span>
-                      <span className="min-w-0 flex-1 pt-1.5 text-sm font-medium leading-snug group-hover:text-foreground">
-                        {item.label}
+                      <span className="min-w-0 flex-1 pt-1.5 leading-snug group-hover:text-foreground">
+                        <span className="block text-xs font-bold uppercase tracking-wide text-primary">
+                          {item.title}
+                        </span>
+                        <span className="mt-0.5 block text-sm font-medium text-foreground/90">{item.label}</span>
                       </span>
                     </Link>
                   </li>
@@ -115,7 +118,7 @@ export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
                           stepLinkClass,
                           "flex flex-col items-center gap-3 p-1 text-muted-foreground hover:text-foreground"
                         )}
-                        aria-label={`Step ${item.step}: ${item.label}`}
+                        aria-label={`Step ${item.step}: ${item.title}. ${item.label}`}
                         aria-current={isActive ? "step" : undefined}
                       >
                         <span className="flex w-full items-center">
@@ -138,8 +141,11 @@ export function ApparelShopBar({ showBack = false }: ApparelShopBarProps) {
                             aria-hidden
                           />
                         </span>
-                        <span className="max-w-[14rem] px-1 text-center text-sm font-medium leading-snug group-hover:text-foreground">
-                          {item.label}
+                        <span className="max-w-[14rem] px-1 text-center leading-snug group-hover:text-foreground">
+                          <span className="block text-xs font-bold uppercase tracking-wide text-primary">
+                            {item.title}
+                          </span>
+                          <span className="mt-0.5 block text-sm font-medium text-foreground/90">{item.label}</span>
                         </span>
                       </Link>
                     </li>

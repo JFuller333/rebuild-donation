@@ -1,3 +1,4 @@
+import { ApparelShopBar } from "@/components/ApparelShopBar";
 import { Header } from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,7 @@ const SHOW_CURRICULUM_PATHWAYS = false;
 /** Toggle to show the “Voices in Ownership” block again (currently hidden). */
 const SHOW_VOICES_IN_OWNERSHIP = false;
 
-/** Official-style YouTube mark (red play tile) for workshop listings. */
+/** Official-style YouTube mark (red play tile) for build session listings. */
 function YouTubeMark({ className }: { className?: string }) {
   return (
     <svg
@@ -72,7 +73,7 @@ const advisoryVoices = [
 const SchoolPathways = () => {
   useEffect(() => {
     const previous = document.title;
-    document.title = "Workshops & Learn | Let's Rebuild Tuskegee";
+    document.title = "Rebuild Workshops & Learn | Let's Rebuild Tuskegee";
     return () => {
       document.title = previous;
     };
@@ -82,9 +83,11 @@ const SchoolPathways = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Header />
 
+      <ApparelShopBar />
+
       <div className="mx-auto max-w-4xl px-6 py-12 space-y-16">
         <header className="space-y-6 text-center sm:text-left">
-          <p className="text-sm font-semibold uppercase tracking-widest text-primary">Workshops</p>
+          <p className="text-sm font-semibold uppercase tracking-widest text-primary">Rebuild Workshops</p>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             Learn live—with real projects in Tuskegee
           </h1>
@@ -96,24 +99,15 @@ const SchoolPathways = () => {
             <Button className="rounded-full" asChild>
               <Link to="/auth">Sign in for access</Link>
             </Button>
-            <Button variant="outline" className="rounded-full" asChild>
-              <Link to="/school/modules">Curriculum modules</Link>
-            </Button>
-            <Button variant="outline" className="rounded-full" asChild>
-              <Link to="/school/library">{"Podcast & library"}</Link>
-            </Button>
-            <Button variant="outline" className="rounded-full" asChild>
-              <Link to="/">Back to home</Link>
-            </Button>
           </div>
         </header>
 
-        <section className="space-y-6" aria-labelledby="workshops-heading">
+        <section className="space-y-6" aria-labelledby="build-sessions-heading">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <Video className="h-7 w-7 text-primary shrink-0" aria-hidden />
-              <h2 id="workshops-heading" className="text-2xl font-bold">
-                Upcoming workshops
+              <h2 id="build-sessions-heading" className="text-2xl font-bold">
+                Upcoming Live Workshops
               </h2>
             </div>
           </div>
@@ -121,7 +115,7 @@ const SchoolPathways = () => {
           <Card className="overflow-hidden border-primary/25 border-2 shadow-md bg-card">
             <CardHeader className="space-y-4 bg-secondary/30 border-b border-border/60">
               <div className="flex flex-wrap items-center gap-3">
-                <Badge className="bg-primary text-primary-foreground">First workshop</Badge>
+                <Badge className="bg-primary text-primary-foreground">First build session</Badge>
                 <Badge variant="secondary">Starts in 2 weeks</Badge>
                 <span className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
                   <YouTubeMark className="h-6 w-6 shrink-0" aria-hidden />
@@ -132,7 +126,7 @@ const SchoolPathways = () => {
                 Building Commercial Units in Tuskegee
               </CardTitle>
               <CardDescription className="text-base text-foreground/90">
-                Join us for our first workshop—real talk on commercial development, local context, and what it
+                Join us for our first build session—real talk on commercial development, local context, and what it
                 takes to build units that serve the community. Stream link will be posted here before we go live.
               </CardDescription>
             </CardHeader>
@@ -176,7 +170,7 @@ const SchoolPathways = () => {
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl">
               Pathways to equity & ownership—structured modules and podcast tie-ins for when you&apos;re ready to go
-              deeper after workshops.
+              deeper after build sessions.
             </p>
 
             <div className="space-y-8">

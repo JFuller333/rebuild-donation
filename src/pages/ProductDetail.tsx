@@ -14,8 +14,9 @@ import { ShopProductCard } from "@/components/ShopProductCard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apparelProductPageCopy } from "@/config/apparel-product-page";
+import { useCartSheet } from "@/contexts/CartSheetContext";
 import { useApparelProducts, useProduct } from "@/hooks/use-shopify-products";
-import { useAddToCart } from "@/hooks/use-shopify-cart";
+import { useAddToCart, useCartItemCount } from "@/hooks/use-shopify-cart";
 import { useToast } from "@/hooks/use-toast";
 import type { ShopifyProduct } from "@/integrations/shopify/types";
 import { Loader2, Minus, Plus, ShoppingCart } from "lucide-react";
@@ -63,6 +64,8 @@ const ProductDetail = () => {
   const { data: product, isLoading, error } = useProduct(handle || "");
   const { data: apparelCatalog } = useApparelProducts(250);
   const { mutate: addToCart, isPending: isAddingToCart } = useAddToCart();
+  const { openCart } = useCartSheet();
+  const cartItemCount = useCartItemCount();
   /** When Shopify exposes `selectedOptions`, we drive variants from this map (e.g. Size + Color). */
   const [optionSelection, setOptionSelection] = useState<Record<string, string>>({});
   /** Fallback when variants have no `selectedOptions` — keep single list selection. */
@@ -240,6 +243,11 @@ const ProductDetail = () => {
                 {apparelProductPageCopy.missionLine ? (
                   <p className="text-sm text-muted-foreground leading-relaxed">{apparelProductPageCopy.missionLine}</p>
                 ) : null}
+                {apparelProductPageCopy.estimatedShippingLine?.trim() ? (
+                  <p className="text-sm text-muted-foreground leading-relaxed border-l-2 border-primary/25 pl-3">
+                    {apparelProductPageCopy.estimatedShippingLine.trim()}
+                  </p>
+                ) : null}
                 {lead ? <p className="text-base text-foreground/90 leading-relaxed pt-1">{lead}</p> : null}
               </div>
 
@@ -365,26 +373,43 @@ const ProductDetail = () => {
               </div>
 
               <div className="space-y-3 pt-1">
-                <Button
-                  size="lg"
-                  className="w-full text-base font-semibold rounded-full h-12 shadow-md shadow-primary/10"
-                  onClick={handleAddToCart}
-                  disabled={
-                    isAddingToCart || !product.availableForSale || !selectedVariant?.availableForSale
-                  }
-                >
-                  {isAddingToCart ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Adding…
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="mr-2 h-5 w-5" />
-                      Add to cart
-                    </>
-                  )}
-                </Button>
+                <div className="flex gap-3 items-stretch">
+                  <Button
+                    size="lg"
+                    className="flex-1 min-w-0 text-base font-semibold rounded-full h-12 shadow-md shadow-primary/10"
+                    onClick={handleAddToCart}
+                    disabled={
+                      isAddingToCart || !product.availableForSale || !selectedVariant?.availableForSale
+                    }
+                  >
+                    {isAddingToCart ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Adding…
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="mr-2 h-5 w-5" />
+                        Add to cart
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="relative h-12 w-12 shrink-0 rounded-full border-2"
+                    onClick={openCart}
+                    aria-label="View shopping cart"
+                  >
+                    <ShoppingCart className="h-5 w-5" />
+                    {cartItemCount > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-5 min-w-5 px-1 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                        {cartItemCount > 99 ? "99+" : cartItemCount}
+                      </span>
+                    )}
+                  </Button>
+                </div>
                 <p className="text-center text-sm text-muted-foreground px-1">{apparelProductPageCopy.checkoutHint}</p>
               </div>
 
