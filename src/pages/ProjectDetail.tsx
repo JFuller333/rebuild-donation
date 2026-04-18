@@ -1010,7 +1010,7 @@ const ProjectDetail = () => {
                 )}
 
             {/* Tabs Content */}
-            <Tabs defaultValue="story" className="w-full">
+            <Tabs defaultValue="updates" className="w-full">
               <TabsList className="flex w-full flex-wrap gap-2 rounded-[999px] bg-[rgb(10,47,39)]/90 p-1 text-sm text-white md:grid md:grid-cols-3 md:gap-0 shadow-[0_12px_35px_rgba(10,47,39,0.35)]">
                 <TabsTrigger
                   value="story"
