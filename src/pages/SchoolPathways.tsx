@@ -18,6 +18,9 @@ import { Link } from "react-router-dom";
 
 const pathways = schoolPathways;
 
+/** Toggle to show the “Curriculum pathways” block again (currently hidden). */
+const SHOW_CURRICULUM_PATHWAYS = false;
+
 /** Official-style YouTube mark (red play tile) for workshop listings. */
 function YouTubeMark({ className }: { className?: string }) {
   return (
@@ -155,77 +158,79 @@ const SchoolPathways = () => {
           </Card>
         </section>
 
-        <section className="space-y-8" aria-labelledby="pathways-heading">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <Compass className="h-6 w-6 text-primary shrink-0" aria-hidden />
-              <h2 id="pathways-heading" className="text-2xl font-bold">
-                Curriculum pathways
-              </h2>
+        {SHOW_CURRICULUM_PATHWAYS ? (
+          <section className="space-y-8" aria-labelledby="pathways-heading">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <Compass className="h-6 w-6 text-primary shrink-0" aria-hidden />
+                <h2 id="pathways-heading" className="text-2xl font-bold">
+                  Curriculum pathways
+                </h2>
+              </div>
+              <Button variant="outline" size="sm" className="rounded-full w-fit shrink-0" asChild>
+                <Link to="/school/modules">View all modules</Link>
+              </Button>
             </div>
-            <Button variant="outline" size="sm" className="rounded-full w-fit shrink-0" asChild>
-              <Link to="/school/modules">View all modules</Link>
-            </Button>
-          </div>
-          <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl">
-            Pathways to equity & ownership—structured modules and podcast tie-ins for when you&apos;re ready to go
-            deeper after workshops.
-          </p>
+            <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl">
+              Pathways to equity & ownership—structured modules and podcast tie-ins for when you&apos;re ready to go
+              deeper after workshops.
+            </p>
 
-          <div className="space-y-8">
-            {pathways.map((path) => (
-              <Card key={path.title} className="overflow-hidden border-border/80 shadow-sm">
-                <CardHeader className="space-y-3 bg-secondary/40 border-b border-border/60">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <CardTitle className="text-xl sm:text-2xl">{path.title}</CardTitle>
-                      <CardDescription className="text-base text-muted-foreground mt-1">{path.subtitle}</CardDescription>
+            <div className="space-y-8">
+              {pathways.map((path) => (
+                <Card key={path.title} className="overflow-hidden border-border/80 shadow-sm">
+                  <CardHeader className="space-y-3 bg-secondary/40 border-b border-border/60">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <CardTitle className="text-xl sm:text-2xl">{path.title}</CardTitle>
+                        <CardDescription className="text-base text-muted-foreground mt-1">{path.subtitle}</CardDescription>
+                      </div>
+                      <Badge variant="secondary" className="shrink-0 text-sm">
+                        {path.moduleCount} modules
+                      </Badge>
                     </div>
-                    <Badge variant="secondary" className="shrink-0 text-sm">
-                      {path.moduleCount} modules
-                    </Badge>
-                  </div>
-                  <p className="text-sm font-medium text-primary">{path.lane}</p>
-                  <p className="text-sm text-foreground/90 leading-relaxed">
-                    <span className="font-semibold text-foreground">Core transformation: </span>
-                    {path.transformation}
-                  </p>
-                </CardHeader>
-                <CardContent className="pt-6 grid gap-8 md:grid-cols-2">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
-                      <BookOpen className="h-4 w-4" aria-hidden />
-                      Curriculum modules
+                    <p className="text-sm font-medium text-primary">{path.lane}</p>
+                    <p className="text-sm text-foreground/90 leading-relaxed">
+                      <span className="font-semibold text-foreground">Core transformation: </span>
+                      {path.transformation}
                     </p>
-                    <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground leading-relaxed">
-                      {path.modules.map((m) => (
-                        <li key={m.id}>
-                          <Link
-                            to={`/school/modules?pathway=${path.slug}#${m.id}`}
-                            className="text-primary underline-offset-4 hover:underline"
-                          >
-                            {m.title}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
-                      <Mic className="h-4 w-4" aria-hidden />
-                      Podcast integration
-                    </p>
-                    <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground leading-relaxed">
-                      {path.podcast.map((p) => (
-                        <li key={p}>{p}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+                  </CardHeader>
+                  <CardContent className="pt-6 grid gap-8 md:grid-cols-2">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                        <BookOpen className="h-4 w-4" aria-hidden />
+                        Curriculum modules
+                      </p>
+                      <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground leading-relaxed">
+                        {path.modules.map((m) => (
+                          <li key={m.id}>
+                            <Link
+                              to={`/school/modules?pathway=${path.slug}#${m.id}`}
+                              className="text-primary underline-offset-4 hover:underline"
+                            >
+                              {m.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
+                        <Mic className="h-4 w-4" aria-hidden />
+                        Podcast integration
+                      </p>
+                      <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground leading-relaxed">
+                        {path.podcast.map((p) => (
+                          <li key={p}>{p}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="space-y-8" aria-labelledby="voices-heading">
           <div className="space-y-3">
