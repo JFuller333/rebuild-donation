@@ -10,12 +10,31 @@ import {
   HardHat,
   Landmark,
   Mic,
+  Video,
 } from "lucide-react";
 import { schoolPathways } from "@/data/school-pathways";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const pathways = schoolPathways;
+
+/** Official-style YouTube mark (red play tile) for workshop listings. */
+function YouTubeMark({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      aria-hidden
+      focusable="false"
+    >
+      <path
+        fill="#FF0000"
+        d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"
+      />
+      <path fill="#fff" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+  );
+}
 
 const advisoryVoices = [
   {
@@ -47,7 +66,7 @@ const advisoryVoices = [
 const SchoolPathways = () => {
   useEffect(() => {
     const previous = document.title;
-    document.title = "Equity & Ownership School | Let's Rebuild Tuskegee";
+    document.title = "Workshops & Learn | Let's Rebuild Tuskegee";
     return () => {
       document.title = previous;
     };
@@ -58,17 +77,14 @@ const SchoolPathways = () => {
       <Header />
 
       <div className="mx-auto max-w-4xl px-6 py-12 space-y-16">
-        <header className="space-y-4 text-center sm:text-left">
-          <p className="text-sm font-semibold uppercase tracking-widest text-primary">Rebuild school (planned)</p>
+        <header className="space-y-6 text-center sm:text-left">
+          <p className="text-sm font-semibold uppercase tracking-widest text-primary">Workshops</p>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-            {"Equity & Ownership School"}
+            Learn live—with real projects in Tuskegee
           </h1>
-          <p className="text-lg font-medium text-primary max-w-2xl">
-            {"Pathways to equity & ownership"}
-          </p>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Real-world learning from operators—not theory alone. Three pathways, structured curriculum, and a
-            podcast library so every topic comes with clarity and context.
+            We&apos;re starting with live sessions on YouTube, then layering in pathways and library content as
+            they ship. Check back for the stream link; the first session is coming up soon.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Button className="rounded-full" asChild>
@@ -86,18 +102,75 @@ const SchoolPathways = () => {
           </div>
         </header>
 
+        <section className="space-y-6" aria-labelledby="workshops-heading">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <Video className="h-7 w-7 text-primary shrink-0" aria-hidden />
+              <h2 id="workshops-heading" className="text-2xl font-bold">
+                Upcoming workshops
+              </h2>
+            </div>
+          </div>
+
+          <Card className="overflow-hidden border-primary/25 border-2 shadow-md bg-card">
+            <CardHeader className="space-y-4 bg-secondary/30 border-b border-border/60">
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge className="bg-primary text-primary-foreground">First workshop</Badge>
+                <Badge variant="secondary">Starts in 2 weeks</Badge>
+                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+                  <YouTubeMark className="h-6 w-6 shrink-0" aria-hidden />
+                  <span>Live on YouTube</span>
+                </span>
+              </div>
+              <CardTitle className="text-2xl sm:text-3xl leading-snug text-balance">
+                Building Commercial Units in Tuskegee
+              </CardTitle>
+              <CardDescription className="text-base text-foreground/90">
+                Join us for our first workshop—real talk on commercial development, local context, and what it
+                takes to build units that serve the community. Stream link will be posted here before we go live.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+              <p className="text-sm text-muted-foreground max-w-xl">
+                Subscribe to Let&apos;s Rebuild Tuskegee on YouTube so you don&apos;t miss the premiere. Details
+                and calendar invite will follow.
+              </p>
+              <Button
+                variant="outline"
+                className="rounded-full shrink-0 gap-2 border-red-600/40 text-red-700 hover:bg-red-50 hover:text-red-800 dark:hover:bg-red-950/30"
+                asChild
+              >
+                <a
+                  href="https://www.youtube.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2"
+                  title="Replace with your channel or premiere link when ready"
+                >
+                  <YouTubeMark className="h-5 w-5" />
+                  YouTube
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
+
         <section className="space-y-8" aria-labelledby="pathways-heading">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <Compass className="h-6 w-6 text-primary shrink-0" aria-hidden />
               <h2 id="pathways-heading" className="text-2xl font-bold">
-                The three pathways
+                Curriculum pathways
               </h2>
             </div>
             <Button variant="outline" size="sm" className="rounded-full w-fit shrink-0" asChild>
               <Link to="/school/modules">View all modules</Link>
             </Button>
           </div>
+          <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl">
+            Pathways to equity & ownership—structured modules and podcast tie-ins for when you&apos;re ready to go
+            deeper after workshops.
+          </p>
 
           <div className="space-y-8">
             {pathways.map((path) => (

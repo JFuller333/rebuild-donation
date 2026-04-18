@@ -102,7 +102,7 @@ export const Header = () => {
             onClick={() => navigate("/school/pathways-to-equity-ownership")}
           >
             <GraduationCap className="h-4 w-4" />
-            School
+            Learn
           </Button>
           <Button
             variant="ghost"
