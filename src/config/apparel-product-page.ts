@@ -24,8 +24,15 @@ export const apparelProductPageCopy = {
   missionLine: "Every purchase supports Let's Rebuild Tuskegee.",
 
   /**
-   * Printify-style estimate: production + carrier. Shown under the mission line on the buy box.
-   * Edit if your Printify product or region defaults change.
+   * Proceeds impact — shown at the top of the apparel product buy box (PDP).
+   * Set to "" to hide.
+   */
+  proceedsImpactLabel:
+    "All proceeds are donated to Let's Rebuild Tuskegee development projects.",
+
+  /**
+   * Printify-style estimate: production + carrier. Shown in the “Shipping & returns” tab only.
+   * Set to "" to omit from that tab.
    */
   estimatedShippingLine:
     "Estimated timing: about 2–7 business days to produce your order, then shipping (often 3–7 business days in the U.S.). Exact dates depend on the item and your address—your checkout page shows the range.",
@@ -40,10 +47,29 @@ export const apparelProductPageCopy = {
 
   trustPoints: ["Shipping and taxes are calculated at checkout."] as const,
 
-  /** Rich HTML for the “Shipping & returns” tab */
+  /**
+   * Order → ship → impact on the PDP. Set `steps` to [] to hide the section.
+   */
+  howItWorks: {
+    heading: "How it works",
+    steps: [
+      {
+        title: "You place your order",
+        body: "Complete checkout for the items you want—sizes, colors, and shipping details are confirmed at checkout.",
+      },
+      {
+        title: "Your order ships to you",
+        body: "Your order is produced and sent to the address you provide. Timing depends on production and carrier—see Shipping & returns for estimates.",
+      },
+      {
+        title: "Proceeds fund development",
+        body: "The proceeds from your sale go toward current Let's Rebuild Tuskegee development projects.",
+      },
+    ] as const,
+  },
+
+  /** Rich HTML appended after the estimated timing paragraph in the “Shipping & returns” tab */
   shippingReturnsHtml: `
-    <p><strong>Estimated fulfillment (Printify)</strong></p>
-    <p>Most apparel orders need about <strong>2–7 business days</strong> for production, then shipping time on top. U.S. delivery is often an additional <strong>3–7 business days</strong> depending on carrier and your location. You’ll see the full range and options at checkout.</p>
     <p class="mt-3">Orders ship to addresses in the U.S. You’ll see shipping options and timing at checkout.</p>
     <p class="mt-3">Questions about your order? Email <a href="mailto:build@letsrebuildtuskegee.org">build@letsrebuildtuskegee.org</a>.</p>
   `.trim(),
@@ -67,3 +93,9 @@ export const apparelProductPageCopy = {
     },
   ] as const,
 } as const;
+
+/**
+ * Shopify product handles to show first on `/shop` (in this order). After those, remaining apparel keeps API order.
+ * Leave empty to put any product whose title contains “hoodie” (case-insensitive) first instead.
+ */
+export const shopProductsFirstHandles: string[] = [];

@@ -6,7 +6,7 @@
  * Layout: PDP sections inspired by modern beverage PDPs (hero + buy box, tabs, highlights, related).
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ApparelShopBar } from "@/components/ApparelShopBar";
 import { Header } from "@/components/Header";
@@ -19,7 +19,20 @@ import { useApparelProducts, useProduct } from "@/hooks/use-shopify-products";
 import { useAddToCart, useCartItemCount } from "@/hooks/use-shopify-cart";
 import { useToast } from "@/hooks/use-toast";
 import type { ShopifyProduct } from "@/integrations/shopify/types";
-import { Loader2, Minus, Plus, ShoppingCart } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowRight,
+  HeartHandshake,
+  Landmark,
+  Loader2,
+  Minus,
+  Plus,
+  ShoppingBag,
+  ShoppingCart,
+  Truck,
+} from "lucide-react";
+
+const HOW_IT_WORKS_ICONS = [ShoppingBag, Truck, Landmark] as const;
 import {
   getDefaultVariant,
   getProductImageUrl,
@@ -239,14 +252,20 @@ const ProductDetail = () => {
                 {product.vendor ? (
                   <p className="text-sm uppercase tracking-wide text-muted-foreground">{product.vendor}</p>
                 ) : null}
+                {apparelProductPageCopy.proceedsImpactLabel.trim() ? (
+                  <div
+                    className="flex items-start gap-3 rounded-lg border border-border bg-muted/40 px-3.5 py-3 text-sm leading-relaxed text-foreground/90 shadow-sm"
+                    role="note"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                      <HeartHandshake className="h-4 w-4" strokeWidth={2} aria-hidden />
+                    </span>
+                    <span className="min-w-0 pt-0.5">{apparelProductPageCopy.proceedsImpactLabel.trim()}</span>
+                  </div>
+                ) : null}
                 <p className="text-3xl md:text-4xl font-bold text-primary tabular-nums">{priceLabel}</p>
                 {apparelProductPageCopy.missionLine ? (
                   <p className="text-sm text-muted-foreground leading-relaxed">{apparelProductPageCopy.missionLine}</p>
-                ) : null}
-                {apparelProductPageCopy.estimatedShippingLine?.trim() ? (
-                  <p className="text-sm text-muted-foreground leading-relaxed border-l-2 border-primary/25 pl-3">
-                    {apparelProductPageCopy.estimatedShippingLine.trim()}
-                  </p>
                 ) : null}
                 {lead ? <p className="text-base text-foreground/90 leading-relaxed pt-1">{lead}</p> : null}
               </div>
@@ -430,7 +449,7 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        <div className="mt-12 md:mt-16 max-w-4xl">
+        <div className="mt-10 md:mt-14 max-w-4xl">
           <Tabs defaultValue="details" className="w-full">
             <TabsList
               className={cn(
@@ -460,11 +479,68 @@ const ProductDetail = () => {
             <TabsContent value="shipping" className="mt-6">
               <div
                 className="prose prose-sm max-w-none text-foreground prose-a:text-primary [&_p]:leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: apparelProductPageCopy.shippingReturnsHtml }}
+                dangerouslySetInnerHTML={{
+                  __html: [
+                    apparelProductPageCopy.estimatedShippingLine.trim()
+                      ? `<p>${apparelProductPageCopy.estimatedShippingLine.trim()}</p>`
+                      : "",
+                    apparelProductPageCopy.shippingReturnsHtml,
+                  ]
+                    .filter(Boolean)
+                    .join(""),
+                }}
               />
             </TabsContent>
           </Tabs>
         </div>
+
+        {apparelProductPageCopy.howItWorks.steps.length > 0 ? (
+          <section
+            className="mt-12 md:mt-16 w-full rounded-2xl border border-border/70 bg-muted/50 px-5 py-10 text-center shadow-sm sm:px-8 md:px-12 md:py-12 dark:bg-muted/25"
+            aria-labelledby="how-it-works-heading"
+          >
+            <h2
+              id="how-it-works-heading"
+              className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground mb-8 md:mb-10"
+            >
+              {apparelProductPageCopy.howItWorks.heading}
+            </h2>
+            <ol className="m-0 flex w-full list-none flex-col gap-4 p-0 md:flex-row md:items-stretch md:gap-2 lg:gap-4">
+              {apparelProductPageCopy.howItWorks.steps.map((step, index) => {
+                const Icon = HOW_IT_WORKS_ICONS[index] ?? ShoppingBag;
+                const steps = apparelProductPageCopy.howItWorks.steps;
+                const isLast = index === steps.length - 1;
+                return (
+                  <Fragment key={step.title}>
+                    <li className="flex min-w-0 flex-1 flex-col items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-4 py-6 md:gap-4 md:px-6 md:py-7">
+                      <span
+                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary ring-1 ring-primary/15"
+                        aria-hidden
+                      >
+                        <Icon className="h-7 w-7" strokeWidth={1.75} />
+                      </span>
+                      <div className="min-w-0 max-w-sm space-y-2 md:max-w-none">
+                        <h3 className="font-semibold text-foreground leading-snug">{step.title}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{step.body}</p>
+                      </div>
+                    </li>
+                    {!isLast ? (
+                      <li
+                        className="flex shrink-0 items-center justify-center py-1.5 md:w-11 md:py-0 md:self-center"
+                        aria-hidden="true"
+                      >
+                        <span className="inline-flex items-center justify-center rounded-full border border-primary/80 bg-primary/10 p-1.5 text-primary shadow-sm ring-1 ring-primary/15 md:p-1.5">
+                          <ArrowDown className="h-4 w-4 md:hidden" strokeWidth={2.25} absoluteStrokeWidth />
+                          <ArrowRight className="hidden h-4 w-4 md:block" strokeWidth={2.25} absoluteStrokeWidth />
+                        </span>
+                      </li>
+                    ) : null}
+                  </Fragment>
+                );
+              })}
+            </ol>
+          </section>
+        ) : null}
 
         {apparelProductPageCopy.highlights.length > 0 ? (
           <section className="mt-14 md:mt-20 border-t border-border pt-12 md:pt-16">

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Hammer, Menu, Shirt, User, ShoppingCart, GraduationCap } from "lucide-react";
+import { CircleUser, Hammer, Menu, Shirt, ShoppingCart, GraduationCap } from "lucide-react";
 import { useCartSheet } from "@/contexts/CartSheetContext";
 import { useCartItemCount } from "@/hooks/use-shopify-cart";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -72,16 +72,6 @@ export const Header = () => {
             <Hammer className="h-4 w-4" aria-hidden />
             Build
           </Button>
-          {user && (
-            <Button 
-              variant="ghost" 
-              className="hidden md:inline-flex"
-              onClick={() => navigate("/donor-dashboard")}
-            >
-              <User className="mr-2 h-4 w-4" />
-              Donor Dashboard
-            </Button>
-          )}
           <Button
             variant="ghost"
             className="hidden md:inline-flex gap-2"
@@ -97,6 +87,16 @@ export const Header = () => {
           >
             Contact Us
           </Button>
+          {user && (
+            <Button
+              variant="ghost"
+              className="hidden md:inline-flex gap-2"
+              onClick={() => navigate("/donor-dashboard")}
+            >
+              <CircleUser className="h-4 w-4" aria-hidden />
+              Donor
+            </Button>
+          )}
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {!user && (
               <Button

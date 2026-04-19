@@ -9,6 +9,7 @@ import {
   isProductAvailable,
 } from "@/lib/shopify-adapters";
 import type { ShopifyProduct } from "@/integrations/shopify/types";
+import { shopProductsFirstHandles } from "@/config/apparel-product-page";
 import { APPAREL_TAG, isApparelProduct } from "@/lib/product-kind";
 import { Loader2 } from "lucide-react";
 
@@ -23,12 +24,39 @@ function productCategoryLabel(product: ShopifyProduct): string {
   return (product.productType || product.vendor || "Apparel").trim() || "Apparel";
 }
 
+/** Pinned handles first; else products with “hoodie” in the title; else API order. */
+function orderShopProducts(products: ShopifyProduct[]): ShopifyProduct[] {
+  if (shopProductsFirstHandles.length > 0) {
+    const byHandle = new Map(products.map((p) => [p.handle, p]));
+    const out: ShopifyProduct[] = [];
+    const seen = new Set<string>();
+    for (const h of shopProductsFirstHandles) {
+      const p = byHandle.get(h);
+      if (p) {
+        out.push(p);
+        seen.add(p.id);
+      }
+    }
+    for (const p of products) {
+      if (!seen.has(p.id)) out.push(p);
+    }
+    return out;
+  }
+  return [...products].sort((a, b) => {
+    const aH = /hoodie/i.test(a.title);
+    const bH = /hoodie/i.test(b.title);
+    if (aH === bH) return 0;
+    return aH ? -1 : 1;
+  });
+}
+
 const Shop = () => {
   const { data, isLoading, error } = useApparelProducts(250);
 
   const products = useMemo(() => {
     if (!data?.edges?.length) return [];
-    return data.edges.map(({ node }) => node).filter((node) => isApparelProduct(node));
+    const list = data.edges.map(({ node }) => node).filter((node) => isApparelProduct(node));
+    return orderShopProducts(list);
   }, [data]);
 
   return (

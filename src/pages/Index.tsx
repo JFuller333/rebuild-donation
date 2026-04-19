@@ -4,8 +4,17 @@ import { FeaturedProjectsSection } from "@/components/FeaturedProjectsSection";
 import { Stats } from "@/components/Stats";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, GraduationCap, Hammer, Shirt } from "lucide-react";
+import { ArrowRight, Calendar, GraduationCap, Hammer, Shirt } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+
+/**
+ * Partner booking link (Calendly). Override with `VITE_PARTNER_BOOKING_URL` in `.env`.
+ * Defaults to the public LRT scheduler so builds work without a local env file.
+ */
+const PARTNER_BOOKING_URL =
+  (typeof import.meta.env.VITE_PARTNER_BOOKING_URL === "string" &&
+    import.meta.env.VITE_PARTNER_BOOKING_URL.trim()) ||
+  "https://calendly.com/build-letsrebuildtuskegee/30min";
 
 const pillars = [
   {
@@ -46,10 +55,6 @@ const pillars = [
 const Index = () => {
   const navigate = useNavigate();
 
-  const scrollProjects = () => {
-    document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
     <div className="min-h-screen">
       <Header />
@@ -72,9 +77,9 @@ const Index = () => {
               Donate. Build. Learn.
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-6 max-w-2xl">
-              Glad you&apos;re here! We love Tuskegee and believe this community deserves a bright next chapter. When you
-              shop, fund a build, or join community development workshops, you carry Let&apos;s Rebuild Tuskegee&apos;s
-              mission forward. Every gift supports the same spirit of care. Let&apos;s Rebuild Tuskegee together!
+              We love Tuskegee and believe our community deserves a bright next chapter. Shop, fund, 
+              or join community development workshops to help drive LRT's
+              mission forward. Every gift supports the same spirit of care and impact #LetsRebuildTuskegeeTogether!
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap gap-3">
               <Button
@@ -82,7 +87,7 @@ const Index = () => {
                 className="rounded-full text-base shadow-lg shadow-primary/15"
                 onClick={() => navigate("/featured-projects")}
               >
-                See projects
+                See Current Projects
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
               <Button size="lg" variant="outline" className="rounded-full text-base" onClick={() => navigate("/shop")}>
@@ -98,9 +103,10 @@ const Index = () => {
       <section id="donate" className="py-20 bg-secondary/30">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-xl mx-auto mb-16">
+            <p className="text-sm font-semibold uppercase tracking-widest text-primary mb-3">Start here</p>
             <h2 className="text-3xl md:text-4xl font-bold mb-3">How it works</h2>
             <p className="text-muted-foreground">
-              Shop sales, project gifts, and workshops all fuel the mission. Choose the step that fits you today.
+              Pick one: shop apparel, give to a project, or join a workshop. Each path supports the same work—select a step below to get started.
             </p>
           </div>
 
@@ -133,24 +139,53 @@ const Index = () => {
 
       <FeaturedProjectsSection />
 
-      <section className="py-20 bg-accent/10">
+      <section id="partner" className="py-20 bg-accent/10">
         <div className="container mx-auto px-4 text-center max-w-2xl">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Start here</h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Thank you for being here. Each choice below sends support into the mission. Pick one and we will meet you
-            there.
+          <p className="text-sm font-semibold uppercase tracking-widest text-primary mb-3">Connect</p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Partner with us</h2>
+          <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+            Organizations, sponsors, volunteers, and neighbors—we want to hear from you. If you&apos;re ready to explore
+            how we can work together, book a short call. We&apos;ll listen, answer questions, and find a path that fits.
           </p>
-          <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center">
-            <Button size="lg" className="rounded-full" onClick={() => navigate("/projects/investment-tier-1")}>
-              Donate now
-            </Button>
-            <Button size="lg" variant="outline" className="rounded-full bg-background/80" onClick={scrollProjects}>
-              Browse projects
-            </Button>
-            <Button size="lg" variant="outline" className="rounded-full bg-background/80" onClick={() => navigate("/shop")}>
-              Shop the store
+          <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center items-center">
+            {PARTNER_BOOKING_URL ? (
+              <Button size="lg" className="rounded-full gap-2" asChild>
+                <a href={PARTNER_BOOKING_URL} target="_blank" rel="noopener noreferrer">
+                  <Calendar className="h-4 w-4" aria-hidden />
+                  Book a call
+                </a>
+              </Button>
+            ) : (
+              <Button size="lg" className="rounded-full gap-2" asChild>
+                <Link to="/contact">
+                  <Calendar className="h-4 w-4" aria-hidden />
+                  Book a call
+                </Link>
+              </Button>
+            )}
+            <Button size="lg" variant="outline" className="rounded-full bg-background/80" asChild>
+              <Link to="/contact">Contact us</Link>
             </Button>
           </div>
+          <p className="text-sm text-muted-foreground mt-8 max-w-lg mx-auto">
+            Looking to give or shop first? Use{" "}
+            <button
+              type="button"
+              className="text-primary font-medium underline-offset-4 hover:underline"
+              onClick={() => document.getElementById("donate")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              How it works
+            </button>{" "}
+            above or open the{" "}
+            <button
+              type="button"
+              className="text-primary font-medium underline-offset-4 hover:underline"
+              onClick={() => navigate("/shop")}
+            >
+              shop
+            </button>
+            .
+          </p>
         </div>
       </section>
 
@@ -179,6 +214,11 @@ const Index = () => {
                 <li>
                   <a href="#donate" className="hover:text-white transition-colors">
                     Donate, Build, Learn
+                  </a>
+                </li>
+                <li>
+                  <a href="https://www.letsrebuildtuskegee.org/" className="hover:text-white transition-colors">
+                    Become a member
                   </a>
                 </li>
                 <li>

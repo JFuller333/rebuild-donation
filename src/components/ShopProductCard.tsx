@@ -47,7 +47,7 @@ export const ShopProductCard = ({
           <Package className="h-4 w-4 shrink-0" aria-hidden />
           <span className="truncate">{categoryLabel}</span>
         </div>
-        <h3 className="text-2xl font-bold leading-tight">{title}</h3>
+        <h3 className="text-2xl font-bold leading-tight tracking-tight text-balance">{title}</h3>
       </CardHeader>
 
       <CardContent className="space-y-3 flex-grow">
