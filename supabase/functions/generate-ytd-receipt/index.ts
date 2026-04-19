@@ -1,4 +1,4 @@
-// Authenticated YTD contribution summary PDF (calendar year through today for current year).
+// Authenticated contribution receipt PDF: from account signup (user.created_at) through today.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
@@ -73,23 +73,21 @@ serve(async (req) => {
     });
   }
 
-  const url = new URL(req.url);
-  const yearParam = url.searchParams.get("year");
   const now = new Date();
-  const year = yearParam ? parseInt(yearParam, 10) : now.getFullYear();
+  const end = now.toISOString();
+  const start = user.created_at
+    ? new Date(user.created_at).toISOString()
+    : new Date(0).toISOString();
 
-  if (Number.isNaN(year) || year < 2020 || year > 2100) {
-    return new Response(JSON.stringify({ error: "Invalid year" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    });
-  }
-
-  const start = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0)).toISOString();
-  const end =
-    year === now.getFullYear()
-      ? now.toISOString()
-      : new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999)).toISOString();
+  const rangeLabelShort = `${new Date(start).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })} – ${now.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })}`;
 
   const { data: donations, error: dErr } = await supabase
     .from("donations")
@@ -140,19 +138,23 @@ serve(async (req) => {
       color: rgb(0.3, 0.3, 0.3),
     });
     y -= 28;
-    page.drawText(`Year-to-date contribution summary — ${year}`, {
+    page.drawText("Contribution receipt", {
       x: 50,
       y,
       size: 14,
       font: helveticaBold,
       color: rgb(0, 0, 0),
     });
-    y -= 18;
-    const through =
-      year === now.getFullYear()
-        ? `January 1 – ${now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`
-        : `January 1 – December 31, ${year}`;
-    page.drawText(through, { x: 50, y, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
+    y -= 16;
+    page.drawText("From your account sign-up through today", {
+      x: 50,
+      y,
+      size: 9,
+      font: helvetica,
+      color: rgb(0.35, 0.35, 0.35),
+    });
+    y -= 14;
+    page.drawText(rangeLabelShort, { x: 50, y, size: 10, font: helvetica, color: rgb(0.2, 0.2, 0.2) });
     y -= 28;
   };
 
@@ -218,7 +220,7 @@ serve(async (req) => {
       if (y - linesNeeded * lineH < 72) {
         page = pdfDoc.addPage([612, 792]);
         y = height - 48;
-        page.drawText(`Contributions (continued) — ${year}`, {
+        page.drawText("Contributions (continued)", {
           x: 50,
           y,
           size: 11,
@@ -271,7 +273,7 @@ serve(async (req) => {
       color: rgb(0, 0, 0),
     });
     y -= 8;
-    const totalText = `Year-to-date total: $${total.toFixed(2)}`;
+    const totalText = `Total for period: $${total.toFixed(2)}`;
     page.drawText(totalText, {
       x: colDate,
       y,
@@ -283,7 +285,7 @@ serve(async (req) => {
   }
 
   const disclaimer =
-    "This summary lists contributions recorded in your account for the period shown. Official tax documentation may use per-gift receipts where issued. Let's Rebuild Tuskegee is a 501(c)(3) nonprofit. Questions: build@letsrebuildtuskegee.org";
+    "This receipt lists gifts recorded after your account sign-up through the date shown. Let's Rebuild Tuskegee is a 501(c)(3) nonprofit. Questions: build@letsrebuildtuskegee.org";
   const discLines = wrapWords(disclaimer, 85);
   let discY = rows.length === 0 ? y - 24 : y;
   for (const line of discLines) {
@@ -296,7 +298,7 @@ serve(async (req) => {
   }
 
   const pdfBytes = await pdfDoc.save();
-  const filename = `LRT-YTD-${year}.pdf`;
+  const filename = `LRT-contribution-receipt.pdf`;
 
   return new Response(pdfBytes, {
     status: 200,

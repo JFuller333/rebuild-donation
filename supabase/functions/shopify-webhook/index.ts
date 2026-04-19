@@ -268,47 +268,6 @@ serve(async (req) => {
         console.error("Error creating donation:", donationError);
         continue;
       }
-
-      // Generate receipt (call receipt generation function)
-      // This will be handled by a separate function or inline
-      try {
-        const receiptResponse = await fetch(
-          `${SUPABASE_URL}/functions/v1/generate-receipt`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-            },
-            body: JSON.stringify({
-              donation_id: donation.id,
-              order_id: order.id.toString(),
-              order_name: order.name,
-              amount: donationAmount,
-              donor_email: order.email,
-              donor_name: `${order.customer.first_name || ""} ${order.customer.last_name || ""}`.trim(),
-              project_title: project.title || "",
-              date: order.created_at,
-            }),
-          }
-        );
-
-        if (receiptResponse.ok) {
-          const receiptData = await receiptResponse.json();
-          
-          // Update donation with receipt URL
-          await supabase
-            .from("donations")
-            .update({
-              receipt_url: receiptData.receipt_url,
-              receipt_generated_at: new Date().toISOString(),
-            })
-            .eq("id", donation.id);
-        }
-      } catch (receiptError) {
-        console.error("Error generating receipt:", receiptError);
-        // Don't fail the whole process if receipt generation fails
-      }
     }
 
     return new Response(

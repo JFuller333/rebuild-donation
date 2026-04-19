@@ -119,7 +119,7 @@ const Auth = () => {
           <CardHeader className="text-center">
             <CardTitle className="text-3xl">Donor Portal</CardTitle>
             <CardDescription>
-              Sign in to view your donation history and tax receipts
+              Sign in to view your donation history and download year-to-date summaries
             </CardDescription>
           </CardHeader>
           <CardContent>
